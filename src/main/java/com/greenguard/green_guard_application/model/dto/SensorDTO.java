@@ -1,5 +1,7 @@
 package com.greenguard.green_guard_application.model.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.Objects;
 
 public record SensorDTO(
