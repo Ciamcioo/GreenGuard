@@ -4,6 +4,7 @@ import com.greenguard.green_guard_application.model.dto.SensorDTO;
 import com.greenguard.green_guard_application.model.entity.Sensor;
 import com.greenguard.green_guard_application.repository.SensorRepository;
 
+import com.greenguard.green_guard_application.service.exception.SensorAlreadyExistsException;
 import com.greenguard.green_guard_application.service.exception.SensorNotFoundException;
 import com.greenguard.green_guard_application.service.mapper.SensorMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,36 +29,35 @@ public class SensorServiceTest {
 
     private static final String SENSOR_NOT_FOUND_MESSAGE = String.format("Sensor with name: %s not found!", TEST_SENSOR_NAME);
 
-
-    private SensorService sensorService;
     private SensorRepository sensorRepository;
     private SensorMapper sensorMapper;
-    private Sensor test_sensor;
-    private SensorDTO test_sensor_dto;
+    private SensorService sensorService;
+
+    private Sensor testSensor;
+    private SensorDTO testSensorDTO;
 
 
     @BeforeEach
     void setup() {
-        test_sensor = new Sensor(TEST_SENSOR_ID,
-                                 TEST_SENSOR_NAME,
-                                 TEST_SENSOR_IP,
-                                 TEST_SENSOR_MAC,
-                                 TEST_SENSOR_ACTIVE);
+        testSensor = new Sensor(TEST_SENSOR_ID,
+                                TEST_SENSOR_NAME,
+                                TEST_SENSOR_IP,
+                                TEST_SENSOR_MAC,
+                                TEST_SENSOR_ACTIVE);
 
-        test_sensor_dto = new SensorDTO(TEST_SENSOR_NAME,
-                                        TEST_SENSOR_IP,
-                                        TEST_SENSOR_MAC,
-                                        TEST_SENSOR_ACTIVE);
+        testSensorDTO = new SensorDTO(TEST_SENSOR_NAME,
+                                      TEST_SENSOR_IP,
+                                      TEST_SENSOR_MAC,
+                                      TEST_SENSOR_ACTIVE);
 
         sensorRepository = mock(SensorRepository.class);
-        when(sensorRepository.findSensorByName(TEST_SENSOR_NAME)).thenReturn(Optional.of(test_sensor));
+        when(sensorRepository.findSensorByName(TEST_SENSOR_NAME)).thenReturn(Optional.of(testSensor));
 
         sensorMapper = mock(SensorMapper.class);
-        when(sensorMapper.toDTO(test_sensor)).thenReturn(test_sensor_dto);
-        when(sensorMapper.toEntity(test_sensor_dto)).thenReturn(test_sensor);
+        when(sensorMapper.toDTO(testSensor)).thenReturn(testSensorDTO);
+        when(sensorMapper.toEntity(testSensorDTO)).thenReturn(testSensor);
 
         sensorService = new SensorServiceImpl(sensorRepository, sensorMapper);
-
     }
 
     @Test
@@ -87,6 +87,39 @@ public class SensorServiceTest {
 
         Exception exception = assertThrows(SensorNotFoundException.class, () -> sensorService.getSensor(TEST_SENSOR_NAME));
         assertEquals(SENSOR_NOT_FOUND_MESSAGE, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Method addSensor() should not return null value")
+    void  addSensorShouldNotReturnNullValue() {
+        assertNotNull(sensorService.addSensor(testSensorDTO));
+    }
+
+    @Test
+    @DisplayName("Return value of addSensor() should be an IP address of passed sensorDTO")
+    void addSensorShouldReturnIPAddressOfPassedSensorDTO() {
+        assertEquals(testSensorDTO.ipAddress(), sensorService.addSensor(testSensorDTO));
+    }
+
+    @Test
+    @DisplayName("Test sensor should throw SensorAlreadyExists() if sensorDTO with provided ip address already exists in database")
+    void addSensorShouldThrowSensorAlreadyExists() {
+        String ipAddressDuplicate = TEST_SENSOR_IP;
+
+        when(sensorRepository.findSensorByIpAddress(ipAddressDuplicate)).thenReturn(Optional.of(testSensor));
+
+        assertThrows(SensorAlreadyExistsException.class, () -> sensorService.addSensor(testSensorDTO));
+        verify(sensorRepository).findSensorByIpAddress(ipAddressDuplicate);
+    }
+
+    @Test
+    @DisplayName("Method addSensor() should make a call to repository to save the sensor to database")
+    void addSensorShouldSaveProvidedData() {
+        when(sensorRepository.findSensorByIpAddress(testSensorDTO.name())).thenReturn(Optional.of(testSensor));
+
+        sensorService.addSensor(testSensorDTO);
+
+        verify(sensorRepository).save(testSensor);
     }
 
 

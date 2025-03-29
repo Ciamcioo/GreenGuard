@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface SensorRepository extends JpaRepository<Sensor, UUID> {
 
     Optional<Sensor> findSensorByName(String name);
+
+    Optional<Sensor> findSensorByIpAddress(String ipAddress);
 }
