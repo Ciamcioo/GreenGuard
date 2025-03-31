@@ -68,15 +68,14 @@ To get started working with the project, the only thing you are going to need is
       mvn compile 
    ```
 
-[//]: # (    - using Maven Wrapper included in the project)
+    - using Maven Wrapper included in the project 
+   ``` shell
 
-[//]: # (   ``` shell)
+     ./mvnw clean install
 
-[//]: # (     ./mvnw clean install)
-
-[//]: # (     ./mvnw compile   )
-
-[//]: # (   ```)
+     ./mvnw compile   
+   ```
+   > **_NOTE:_** Maven wrapper should be used if you don't have maven installed on your machine 
 
 3. Run the project
     - using Maven installed locally
@@ -84,13 +83,11 @@ To get started working with the project, the only thing you are going to need is
     mvn spring-boot:run
    ```
 
-[//]: # (    - using Maven Wrapper included in the project)
+    - using Maven Wrapper included in the project
 
-[//]: # (   ``` shell)
-
-[//]: # (    ./mvnw spring-boot:run)
-
-[//]: # (   ```)
+   ``` shell
+    ./mvnw spring-boot:run
+   ```
 4. Get to the documentation side to get to know the project API
    Open your favorite browser and go to the documentation side which is located under <http://localhost:9090/swagger-ui/index.html>
 
