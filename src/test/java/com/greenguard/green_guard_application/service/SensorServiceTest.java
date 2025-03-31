@@ -47,7 +47,6 @@ public class SensorServiceTest {
 
         testSensorDTO = new SensorDTO(TEST_SENSOR_NAME,
                                       TEST_SENSOR_IP,
-                                      TEST_SENSOR_MAC,
                                       TEST_SENSOR_ACTIVE);
 
         sensorRepository = mock(SensorRepository.class);

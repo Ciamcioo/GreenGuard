@@ -14,14 +14,13 @@ public interface SensorMapper {
 
     @Mapping(target = "name", source = "entity.name")
     @Mapping(target = "ipAddress", source = "entity.ipAddress")
-    @Mapping(target = "macAddress", source = "entity.macAddress")
     @Mapping(target = "active", source = "entity.active")
     SensorDTO toDTO(Sensor entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "name", source = "dto.name")
     @Mapping(target = "ipAddress", source = "dto.ipAddress")
-    @Mapping(target = "macAddress", source = "dto.macAddress")
+    @Mapping(target = "macAddress", ignore = true)
     @Mapping(target = "active", source = "dto.active")
     @Mapping(target = "readings", ignore = true)
     Sensor toEntity(SensorDTO dto);

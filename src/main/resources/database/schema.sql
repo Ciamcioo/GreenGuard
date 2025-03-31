@@ -3,7 +3,7 @@ CREATE TABLE sensors(
     id UUID PRIMARY KEY,
     name VARCHAR(100) DEFAULT 'not specified',
     ip_address VARCHAR(17) NOT NULL,
-    mac_address VARCHAR(17) NOT NULL,
+    mac_address VARCHAR(17),
     is_active BOOL DEFAULT false
 );
 
