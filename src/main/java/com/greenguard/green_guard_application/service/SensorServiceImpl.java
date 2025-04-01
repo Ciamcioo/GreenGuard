@@ -64,6 +64,19 @@ public class SensorServiceImpl implements SensorService {
         sensorRepository.delete(sensor.get());
     }
 
+    @Override
+    @EnableMethodCallLog
+    public void updateSensorName(String name, String newName) {
+        Optional<Sensor> sensor  = sensorRepository.findSensorByName(name);
+
+        if (!sensor.isPresent()) {
+            throw new SensorNotFoundException(name);
+        }
+
+        sensorRepository.updateSensorName(name, newName);
+    }
+
+
     private boolean validateIsNotNull(Object object) {
         return object != null;
     }
