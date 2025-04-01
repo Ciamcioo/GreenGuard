@@ -29,6 +29,17 @@ public class SensorRestController {
         );
     }
 
+    @DeleteMapping("/sensor/delete/{name}")
+    @EnableMethodLog
+    public ResponseEntity<Void> deleteSensor(@PathVariable("name") String name) {
+        sensorService.deleteSensor(name);
+
+        return new ResponseEntity<>(
+            HttpStatus.OK
+        );
+    }
+
+
     @PostMapping("/sensor")
     public ResponseEntity<String> addSensor(@RequestBody SensorDTO sensorDTO) {
         return new ResponseEntity<>(

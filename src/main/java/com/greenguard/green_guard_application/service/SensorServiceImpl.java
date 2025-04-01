@@ -52,6 +52,18 @@ public class SensorServiceImpl implements SensorService {
         return sensorDTO.ipAddress();
     }
 
+    @Override
+    @EnableMethodCallLog
+    public void deleteSensor(String name) {
+        Optional<Sensor> sensor  = sensorRepository.findSensorByName(name);
+
+        if (!sensor.isPresent()) {
+            throw new SensorNotFoundException(name);
+        }
+
+        sensorRepository.delete(sensor.get());
+    }
+
     private boolean validateIsNotNull(Object object) {
         return object != null;
     }

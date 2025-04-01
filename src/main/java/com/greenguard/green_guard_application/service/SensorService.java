@@ -10,4 +10,6 @@ public interface SensorService {
     SensorDTO getSensor(String name);
 
     String addSensor(@NotNull SensorDTO sensorDTO);
+
+    void deleteSensor(String name);
 }

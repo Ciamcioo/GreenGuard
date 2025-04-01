@@ -13,4 +13,6 @@ public interface SensorRepository extends JpaRepository<Sensor, UUID> {
     Optional<Sensor> findSensorByName(String name);
 
     Optional<Sensor> findSensorByIpAddress(String ipAddress);
+
+    void deleteSensorByName(String name);
 }
