@@ -2,6 +2,7 @@ package com.greenguard.green_guard_application.restController;
 
 import com.greenguard.green_guard_application.aspect.annotation.EnableMethodLog;
 import com.greenguard.green_guard_application.model.dto.SensorDTO;
+import com.greenguard.green_guard_application.model.dto.SingleFieldRequestDTO;
 import com.greenguard.green_guard_application.service.SensorService;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,27 @@ public class SensorRestController {
     public ResponseEntity<SensorDTO> getSensor(@PathVariable("name") String name) {
         return new ResponseEntity<>(
             sensorService.getSensor(name),
+            HttpStatus.OK
+        );
+    }
+
+    @DeleteMapping("/sensor/delete/{name}")
+    @EnableMethodLog
+    public ResponseEntity<Void> deleteSensor(@PathVariable("name") String name) {
+        sensorService.deleteSensor(name);
+
+        return new ResponseEntity<>(
+            HttpStatus.OK
+        );
+    }
+
+    @PutMapping("/sensor/update/{name}")
+    @EnableMethodLog
+    public ResponseEntity<Void> updateSensorName(@PathVariable("name") String name,
+                                     @RequestBody SingleFieldRequestDTO<String> newName) {
+        sensorService.updateSensorName(name, newName.getValue());
+
+        return new ResponseEntity<>(
             HttpStatus.OK
         );
     }
