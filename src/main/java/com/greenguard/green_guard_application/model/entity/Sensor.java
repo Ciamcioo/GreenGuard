@@ -33,6 +33,8 @@ public class Sensor {
     )
     List<Reading> readings  = new ArrayList<>();
 
+    tcpClient client;
+
     public Sensor() {}
 
     public Sensor(String name, String ipAddress, String macAddress, Boolean active) {
@@ -40,6 +42,10 @@ public class Sensor {
         this.ipAddress = ipAddress;
         this.macAddress = macAddress;
         this.active = active;
+
+        /* TODO: fix this hardcoded port number */
+        this.client = new tcpClient(ipAddress, 3333);
+        this.client.connect();
     }
 
     public Sensor(UUID id, String name, String ipAddress, String macAddress, Boolean active) {
@@ -48,6 +54,10 @@ public class Sensor {
         this.ipAddress = ipAddress;
         this.macAddress = macAddress;
         this.active = active;
+
+        /* TODO: fix this hardcoded port number */
+        this.client = new tcpClient(ipAddress, 3333);
+        this.client.connect();
     }
 
 
