@@ -12,4 +12,6 @@ public interface SensorService {
     String addSensor(@NotNull SensorDTO sensorDTO);
 
     void deleteSensor(String name);
+
+    void updateSensorName(String name, String newName);
 }

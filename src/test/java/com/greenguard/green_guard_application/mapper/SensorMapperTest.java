@@ -38,7 +38,6 @@ public class SensorMapperTest {
 
         test_sensor_dto = new SensorDTO(TEST_SENSOR_NAME,
                                         TEST_SENSOR_IP,
-                                        TEST_SENSOR_MAC,
                                         TEST_SENSOR_ACTIVE);
     }
 
@@ -50,7 +49,6 @@ public class SensorMapperTest {
         assertAll(
                 () -> assertEquals(TEST_SENSOR_NAME, resultSensorDTO.name()),
                 () -> assertEquals(TEST_SENSOR_IP, resultSensorDTO.ipAddress()),
-                () -> assertEquals(TEST_SENSOR_MAC, resultSensorDTO.macAddress()),
                 () -> assertEquals(TEST_SENSOR_ACTIVE, resultSensorDTO.active())
         );
     }
@@ -64,7 +62,7 @@ public class SensorMapperTest {
                 () -> assertNull(resultSensor.getId()),
                 () -> assertEquals(TEST_SENSOR_NAME, resultSensor.getName()),
                 () -> assertEquals(TEST_SENSOR_IP, resultSensor.getIpAddress()),
-                () -> assertEquals(TEST_SENSOR_MAC, resultSensor.getMacAddress()),
+                () -> assertNull(resultSensor.getMacAddress()),
                 () -> assertEquals(TEST_SENSOR_ACTIVE, resultSensor.getActive()),
                 () -> assertTrue(resultSensor.getReadings().isEmpty())
         );
