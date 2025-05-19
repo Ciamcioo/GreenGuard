@@ -16,3 +16,9 @@ CREATE TABLE readings(
     capture_time TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (sensor_id) REFERENCES sensors(id) ON DELETE CASCADE
 );
+
+DROP TABLE IF EXISTS gg_users;
+CREATE TABLE gg_users(
+    username VARCHAR(100) PRIMARY KEY,
+    password VARCHAR(255)
+)

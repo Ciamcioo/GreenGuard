@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000") // as soon as I will configure the spring security filter I will disable it
 public class SensorRestController {
     private SensorService sensorService;
 

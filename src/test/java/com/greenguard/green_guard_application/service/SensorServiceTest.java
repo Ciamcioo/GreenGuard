@@ -18,7 +18,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
 public class SensorServiceTest {
 
     private static final UUID    TEST_SENSOR_ID           = UUID.randomUUID();
@@ -47,10 +46,6 @@ public class SensorServiceTest {
 
         testSensorDTO = new SensorDTO(TEST_SENSOR_NAME,
                                       TEST_SENSOR_IP,
-<<<<<<< HEAD
-                                      TEST_SENSOR_MAC,
-=======
->>>>>>> main
                                       TEST_SENSOR_ACTIVE);
 
         sensorRepository = mock(SensorRepository.class);

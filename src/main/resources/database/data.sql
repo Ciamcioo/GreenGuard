@@ -31,3 +31,10 @@ VALUES (
         40.10,
         CURRENT_TIMESTAMP()
        );
+
+
+INSERT INTO gg_users
+VALUES (
+        'admin',
+        '$2a$10$YLMG97UK53w.fAkh2Ys/uel3yvNtTg0SfpAbpoan0nBIgVmHtv8y6'
+       );

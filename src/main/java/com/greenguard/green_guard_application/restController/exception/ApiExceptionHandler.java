@@ -4,22 +4,30 @@ import com.greenguard.green_guard_application.aspect.annotation.EnableMethodCall
 import com.greenguard.green_guard_application.service.exception.SensorNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.naming.AuthenticationException;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(exception = SensorNotFoundException.class)
+    @ExceptionHandler(exception = { SensorNotFoundException.class,  UsernameNotFoundException.class })
     @EnableMethodCallLog
     protected ResponseEntity<String> notFoundExceptionHandler(Exception exception) {
         return new ResponseEntity<>(exception.getMessage(),
                                     HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(exception = AuthenticationException.class)
+    protected ResponseEntity<String> authenticationExceptionHandler(AuthenticationException authException) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                             .body(authException.getMessage());
     }
 
     @ExceptionHandler(exception = Exception.class)
