@@ -1,0 +1,24 @@
+# Ignore compile Java classes
+*.class
+
+#Ignore source code
+src/
+
+# Ignore Maven target directory
+target/
+.mvn/
+mvnw
+mvnm.cmd
+pom.xml
+
+# Ignore IDE's directories
+.idea/
+
+# Ignore git files
+.gitignore
+.gitattributes
+
+# Ignore Markdown files
+*.md
+
+
