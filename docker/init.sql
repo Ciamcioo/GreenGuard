@@ -11,9 +11,9 @@ DROP TABLE IF EXISTS readings;
 CREATE TABLE readings(
                          id UUID PRIMARY KEY,
                          sensor_id UUID NOT NULL,
-                         temperature DECIMAL(5,2),
-                         humidity DECIMAL(5,2),
-                         capture_time TIMESTAMP DEFAULT NOW(),
+                         temperature FLOAT,
+                         humidity FLOAT,
+                         capture_time DATE DEFAULT NOW(),
                          FOREIGN KEY (sensor_id) REFERENCES sensors(id) ON DELETE CASCADE
 );
 
