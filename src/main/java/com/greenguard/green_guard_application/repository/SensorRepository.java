@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Repository
 public interface SensorRepository extends JpaRepository<Sensor, UUID> {
@@ -20,6 +21,8 @@ public interface SensorRepository extends JpaRepository<Sensor, UUID> {
     Optional<Sensor> findSensorByIpAddress(String ipAddress);
 
     void deleteSensorByName(String name);
+
+    List<Sensor> findByActiveTrue();
 
     @Modifying
     @Transactional

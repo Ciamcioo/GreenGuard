@@ -6,6 +6,8 @@ import com.greenguard.green_guard_application.model.dto.SensorDTO;
 import com.greenguard.green_guard_application.model.entity.Sensor;
 import com.greenguard.green_guard_application.repository.SensorRepository;
 import com.greenguard.green_guard_application.service.exception.SensorAlreadyExistsException;
+import com.greenguard.green_guard_application.sensor.SensorRunner;
+
 import com.greenguard.green_guard_application.service.exception.SensorNotFoundException;
 import com.greenguard.green_guard_application.service.mapper.SensorMapper;
 import jakarta.validation.constraints.NotNull;
@@ -20,12 +22,16 @@ import java.util.Optional;
 public class SensorServiceImpl implements SensorService {
     private final SensorRepository sensorRepository;
     private final SensorMapper sensorMapper;
+    private final SensorRunner sensorRunner;
 
 
     @Autowired
-    public SensorServiceImpl(SensorRepository sensorRepository, SensorMapper sensorMapper) {
+    public SensorServiceImpl(SensorRepository sensorRepository,
+        SensorMapper sensorMapper,
+        SensorRunner sensorRunner) {
         this.sensorRepository = sensorRepository;
         this.sensorMapper = sensorMapper;
+        this.sensorRunner = sensorRunner;
     }
 
     @Override
@@ -49,19 +55,30 @@ public class SensorServiceImpl implements SensorService {
         Sensor sensorToPersist = sensorMapper.toEntity(sensorDTO);
         sensorRepository.save(sensorToPersist);
 
+        if(sensorToPersist.getActive() == true) {
+            sensorRunner.addActiveSensor(sensorToPersist);
+        }
+
         return sensorDTO.ipAddress();
     }
 
     @Override
     @EnableMethodCallLog
     public void deleteSensor(String name) {
-        Optional<Sensor> sensor  = sensorRepository.findSensorByName(name);
+        Optional<Sensor> sensorOpt  = sensorRepository.findSensorByName(name);
 
-        if (sensor.isEmpty()) {
+        if (sensorOpt.isEmpty()) {
             throw new SensorNotFoundException(name);
         }
 
-        sensorRepository.delete(sensor.get());
+        Sensor sensor = sensorOpt.get();
+
+        if(sensor.getActive() == true) {
+            sensorRunner.deleteActiveSensor(sensor);
+        }
+
+
+        sensorRepository.delete(sensor);
     }
 
     @Override
