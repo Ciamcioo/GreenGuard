@@ -13,7 +13,7 @@ CREATE TABLE readings(
                          sensor_id UUID NOT NULL,
                          temperature DECIMAL(5,2),
                          humidity DECIMAL(5,2),
-                         capture_time TIMESTAMP DEFAULT NOW(),
+                         capture_time TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                          FOREIGN KEY (sensor_id) REFERENCES sensors(id) ON DELETE CASCADE
 );
 
