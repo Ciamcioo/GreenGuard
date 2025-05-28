@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import com.greenguard.green_guard_application.sensor.ATHPacketBuilder;
 
-public class SensorContext {
+public class SensorContext implements AutoCloseable{
     private final UUID id;
     private final String ip;
     private final int port = 5555;
@@ -20,6 +20,21 @@ public class SensorContext {
     public SensorContext(UUID id, String ip) {
         this.id = id;
         this.ip = ip;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(this.socket != null && !this.socket.isClosed()) {
+          socket.close();
+        }
+    }
+
+    public UUID getId() {
+      return this.id;
+    }
+
+    public String getIpAddress() {
+      return this.ip;
     }
 
     public boolean connect()
