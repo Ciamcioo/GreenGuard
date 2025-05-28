@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -16,6 +17,9 @@ public class Sensor {
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "username")
+    private String username;
 
     @Column(name = "ip_address")
     private String ipAddress;
@@ -35,16 +39,18 @@ public class Sensor {
 
     public Sensor() {}
 
-    public Sensor(String name, String ipAddress, String macAddress, Boolean active) {
+    public Sensor(String name, String username, String ipAddress, String macAddress, Boolean active) {
         this.name = name;
+        this.username = username;
         this.ipAddress = ipAddress;
         this.macAddress = macAddress;
         this.active = active;
     }
 
-    public Sensor(UUID id, String name, String ipAddress, String macAddress, Boolean active) {
+    public Sensor(UUID id, String name, String username, String ipAddress, String macAddress, Boolean active) {
         this.id = id;
         this.name = name;
+        this.username = username;
         this.ipAddress = ipAddress;
         this.macAddress = macAddress;
         this.active = active;
@@ -65,6 +71,14 @@ public class Sensor {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getIpAddress() {
@@ -97,5 +111,17 @@ public class Sensor {
 
     public void setReadings(List<Reading> readings) {
         this.readings = readings;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Sensor sensor = (Sensor) o;
+        return Objects.equals(id, sensor.id) && Objects.equals(name, sensor.name) && Objects.equals(macAddress, sensor.macAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, macAddress);
     }
 }

@@ -2,7 +2,6 @@ package com.greenguard.green_guard_application.mapper;
 
 import com.greenguard.green_guard_application.model.dto.SensorDTO;
 import com.greenguard.green_guard_application.model.entity.Sensor;
-import com.greenguard.green_guard_application.service.exception.SensorConversionException;
 import com.greenguard.green_guard_application.service.mapper.SensorMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,10 +13,11 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.profiles.active=test")
 public class SensorMapperTest {
     private static final UUID    TEST_SENSOR_ID           = UUID.randomUUID();
     private static final String  TEST_SENSOR_NAME         = "Foo";
+    private static final String  TEST_SENSOR_USERNAME     = "John";
     private static final String  TEST_SENSOR_IP           = "192.168.1.10";
     private static final String  TEST_SENSOR_MAC          = "DE:AD:BE:EF:12:34";
     private static final Boolean TEST_SENSOR_ACTIVE       = false;
@@ -32,11 +32,13 @@ public class SensorMapperTest {
     void setup() {
         test_sensor_entity = new Sensor(TEST_SENSOR_ID,
                                         TEST_SENSOR_NAME,
+                                        TEST_SENSOR_USERNAME,
                                         TEST_SENSOR_IP,
                                         TEST_SENSOR_MAC,
                                         TEST_SENSOR_ACTIVE);
 
         test_sensor_dto = new SensorDTO(TEST_SENSOR_NAME,
+                                        TEST_SENSOR_USERNAME,
                                         TEST_SENSOR_IP,
                                         TEST_SENSOR_ACTIVE);
     }
@@ -48,6 +50,7 @@ public class SensorMapperTest {
 
         assertAll(
                 () -> assertEquals(TEST_SENSOR_NAME, resultSensorDTO.name()),
+                () -> assertEquals(TEST_SENSOR_USERNAME, resultSensorDTO.username()),
                 () -> assertEquals(TEST_SENSOR_IP, resultSensorDTO.ipAddress()),
                 () -> assertEquals(TEST_SENSOR_ACTIVE, resultSensorDTO.active())
         );
@@ -61,6 +64,7 @@ public class SensorMapperTest {
         assertAll(
                 () -> assertNull(resultSensor.getId()),
                 () -> assertEquals(TEST_SENSOR_NAME, resultSensor.getName()),
+                () -> assertEquals(TEST_SENSOR_USERNAME, resultSensor.getUsername()),
                 () -> assertEquals(TEST_SENSOR_IP, resultSensor.getIpAddress()),
                 () -> assertNull(resultSensor.getMacAddress()),
                 () -> assertEquals(TEST_SENSOR_ACTIVE, resultSensor.getActive()),

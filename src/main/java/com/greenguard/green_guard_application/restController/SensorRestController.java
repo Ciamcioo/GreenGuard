@@ -44,7 +44,7 @@ public class SensorRestController {
     @PutMapping("/sensor/update/{name}")
     @EnableMethodLog
     public ResponseEntity<Void> updateSensorName(@PathVariable("name") String name,
-                                     @RequestBody SingleFieldRequestDTO<String> newName) {
+                                                 @RequestBody SingleFieldRequestDTO<String> newName) {
         sensorService.updateSensorName(name, newName.getValue());
 
         return new ResponseEntity<>(
