@@ -63,6 +63,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @EnableMethodLog
+    @EnableExceptionThrowingLog
     public String signup(CredentialsDTO credentialsDTO) {
         log.trace("Start of register user register process...");
 
@@ -70,6 +72,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (!credentialsDTO.isPasswordEncoded()) {
             String encodedOPassword = passEncoder.encode(credentialsDTO.getPassword());
+            log.trace("Encoded password: {}", encodedOPassword);
             credentialsDTO.setPassword(encodedOPassword);
             credentialsDTO.setPasswordEncoded(true);
             log.trace("Password encoded");

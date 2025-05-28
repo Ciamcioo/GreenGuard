@@ -18,10 +18,12 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest(properties = "spring.profiles.active=test")
 public class SensorServiceTest {
 
     private static final UUID    TEST_SENSOR_ID           = UUID.randomUUID();
     private static final String  TEST_SENSOR_NAME         = "Foo";
+    private static final String  TEST_SENSOR_USERNAME     = "John";
     private static final String  TEST_SENSOR_IP           = "192.168.1.10";
     private static final String  TEST_SENSOR_MAC          = "DE:AD:BE:EF:12:34";
     private static final Boolean TEST_SENSOR_ACTIVE       = false;
@@ -29,7 +31,6 @@ public class SensorServiceTest {
     private static final String SENSOR_NOT_FOUND_MESSAGE = String.format("Sensor with name: %s not found!", TEST_SENSOR_NAME);
 
     private SensorRepository sensorRepository;
-    private SensorMapper sensorMapper;
     private SensorService sensorService;
 
     private Sensor testSensor;
@@ -39,19 +40,21 @@ public class SensorServiceTest {
     @BeforeEach
     void setup() {
         testSensor = new Sensor(TEST_SENSOR_ID,
+                                TEST_SENSOR_USERNAME,
                                 TEST_SENSOR_NAME,
                                 TEST_SENSOR_IP,
                                 TEST_SENSOR_MAC,
                                 TEST_SENSOR_ACTIVE);
 
         testSensorDTO = new SensorDTO(TEST_SENSOR_NAME,
+                                      TEST_SENSOR_USERNAME,
                                       TEST_SENSOR_IP,
                                       TEST_SENSOR_ACTIVE);
 
         sensorRepository = mock(SensorRepository.class);
         when(sensorRepository.findSensorByName(TEST_SENSOR_NAME)).thenReturn(Optional.of(testSensor));
 
-        sensorMapper = mock(SensorMapper.class);
+        SensorMapper sensorMapper = mock(SensorMapper.class);
         when(sensorMapper.toDTO(testSensor)).thenReturn(testSensorDTO);
         when(sensorMapper.toEntity(testSensorDTO)).thenReturn(testSensor);
 
@@ -119,10 +122,4 @@ public class SensorServiceTest {
 
         verify(sensorRepository).save(testSensor);
     }
-
-
-
-
-
-
 }

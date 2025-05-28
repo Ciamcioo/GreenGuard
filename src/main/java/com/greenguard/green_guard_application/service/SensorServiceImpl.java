@@ -57,7 +57,7 @@ public class SensorServiceImpl implements SensorService {
     public void deleteSensor(String name) {
         Optional<Sensor> sensor  = sensorRepository.findSensorByName(name);
 
-        if (!sensor.isPresent()) {
+        if (sensor.isEmpty()) {
             throw new SensorNotFoundException(name);
         }
 
@@ -69,7 +69,7 @@ public class SensorServiceImpl implements SensorService {
     public void updateSensorName(String name, String newName) {
         Optional<Sensor> sensor  = sensorRepository.findSensorByName(name);
 
-        if (!sensor.isPresent()) {
+        if (sensor.isEmpty()) {
             throw new SensorNotFoundException(name);
         }
 

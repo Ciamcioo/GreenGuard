@@ -2,7 +2,6 @@ package com.greenguard.green_guard_application.security;
 
 import com.greenguard.green_guard_application.model.entity.User;
 import com.greenguard.green_guard_application.repository.UserRepository;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

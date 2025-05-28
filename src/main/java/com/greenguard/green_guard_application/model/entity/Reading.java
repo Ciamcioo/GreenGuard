@@ -2,7 +2,7 @@ package com.greenguard.green_guard_application.model.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -24,16 +24,24 @@ public class Reading {
     private Double humidity;
 
     @Column(name = "capture_time")
-    private LocalDate readingTimestamp;
+    private Instant timestamp;
 
     public Reading() {
     }
 
-    public Reading(Sensor sensor, Double temperature, Double humidity, LocalDate readingTimestamp) {
+    public Reading(Sensor sensor, Double temperature, Double humidity, Instant timestamp) {
         this.sensor = sensor;
         this.temperature = temperature;
         this.humidity = humidity;
-        this.readingTimestamp = readingTimestamp;
+        this.timestamp = timestamp;
+    }
+
+    public Reading(UUID id, Sensor sensor, Double temperature, Double humidity, Instant timestamp) {
+        this.id = id;
+        this.sensor = sensor;
+        this.temperature = temperature;
+        this.humidity = humidity;
+        this.timestamp = timestamp;
     }
 
     public UUID getId() {
@@ -68,12 +76,12 @@ public class Reading {
         this.humidity = humidity;
     }
 
-    public LocalDate getReadingTimestamp() {
-        return readingTimestamp;
+    public Instant getTimestamp() {
+        return timestamp;
     }
 
-    public void setReadingTimestamp(LocalDate readingTimestamp) {
-        this.readingTimestamp = readingTimestamp;
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override
@@ -82,7 +90,7 @@ public class Reading {
                 "sensor=" + sensor +
                 ", temperature=" + temperature +
                 ", humidity=" + humidity +
-                ", readingTimestamp=" + readingTimestamp +
+                ", readingTimestamp=" + timestamp +
                 '}';
     }
 
