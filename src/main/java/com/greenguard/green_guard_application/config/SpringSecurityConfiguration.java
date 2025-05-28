@@ -5,11 +5,13 @@ import com.greenguard.green_guard_application.security.AuthTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -26,8 +28,13 @@ public class SpringSecurityConfiguration {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfiguration) throws Exception {
-        return authConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(BCryptPasswordEncoder passwordEncoder,
+                                                       UserDetailsService userDetailsService) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setPasswordEncoder(passwordEncoder);
+        authProvider.setUserDetailsService(userDetailsService);
+
+        return new ProviderManager(authProvider);
     }
 
     @Bean
@@ -46,7 +53,7 @@ public class SpringSecurityConfiguration {
                            .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authEntryPointImpl))
                            .authorizeHttpRequests(auth -> auth
                                .requestMatchers("/api/auth/login",
-                                                "api/auth/signup",
+                                                "/api/auth/signup",
                                                 "/h2-console/**",
                                                 "/swagger-ui/**",
                                                 "/swagger-ui.html",

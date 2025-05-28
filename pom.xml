@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.2</version>
+		<version>3.5.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
@@ -14,7 +14,7 @@
 	<artifactId>green-guard-application</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>green-guard-application</name>
-	<description>Green Gurd is a web application conected with sets of different sensor to keep your plant safe and happy</description>
+	<description>Green Gurd is a web application connected with sets of different sensor to keep your plant safe and happy</description>
 	<url/>
 
 	<licenses>
@@ -129,7 +129,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
