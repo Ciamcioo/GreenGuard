@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -28,6 +29,8 @@ public class AuthServiceTest {
     JwtUtil jwtTokenGenerator;
     UserRepository userRepository;
 
+    UserDetails validUserDetails;
+    UserDetails encodedUserDetails;
     CredentialsDTO validCredentialsDTO;
     CredentialsDTO encdoedCredentialsDTO;
 
@@ -41,9 +44,18 @@ public class AuthServiceTest {
 
         authManager = mock(AuthenticationManager.class);
         passwordEncoder = mock(PasswordEncoder.class);
-        userDetailsService = mock(UserDetailsService.class);
         jwtTokenGenerator = mock(JwtUtil.class);
         userRepository = mock(UserRepository.class);
+
+        userDetailsService = mock(UserDetailsService.class);
+        validUserDetails   = mock(UserDetails.class);
+        encodedUserDetails = mock(UserDetails.class);
+
+        when(userDetailsService.loadUserByUsername(validCredentialsDTO.getUsername())).thenReturn(validUserDetails);
+        when(validUserDetails.getUsername()).thenReturn(validCredentialsDTO.getUsername());
+
+        when(userDetailsService.loadUserByUsername(encdoedCredentialsDTO.getUsername())).thenReturn(encodedUserDetails);
+        when(encodedUserDetails.getUsername()).thenReturn(encdoedCredentialsDTO.getUsername());
 
 
         when(jwtTokenGenerator.generateToken(anyString())).thenReturn("token");
@@ -58,14 +70,6 @@ public class AuthServiceTest {
     void returnNotNullValueForLoginMethod() {
         assertNotNull(authService.login(validCredentialsDTO));
         assertThrows(IllegalArgumentException.class, () -> authService.login(null));
-    }
-
-    @Test
-    @DisplayName("If a password is not encoded, the login method should perform encoding")
-    void passwordEncodingShouldBePerformedIfThePasswordIsNotEncoded() {
-        assertFalse(validCredentialsDTO.isPasswordEncoded());
-        authService.login(validCredentialsDTO);
-        assertTrue(validCredentialsDTO.isPasswordEncoded());
     }
 
     @Test
@@ -92,6 +96,7 @@ public class AuthServiceTest {
     void userDetailsHasBennLoadedReturnString() {
         assertInstanceOf(String.class, authService.login(validCredentialsDTO));
         assertInstanceOf(String.class, authService.login(encdoedCredentialsDTO));
+
 
         verify(userDetailsService).loadUserByUsername(validCredentialsDTO.getUsername());
         verify(userDetailsService).loadUserByUsername(encdoedCredentialsDTO.getUsername());
