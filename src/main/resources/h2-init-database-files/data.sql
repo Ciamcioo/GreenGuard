@@ -5,6 +5,24 @@ VALUES (
        );
 
 INSERT INTO sensors(id, username, name, ip_address, mac_address,  is_active )
+INSERT INTO locations
+VALUES ('Wroclaw');
+
+INSERT INTO locations
+VALUES ('Warszawa');
+
+INSERT INTO locations
+VALUES ('Poznan');
+
+INSERT INTO locations
+VALUES ('Rzeszow');
+
+INSERT INTO locations
+VALUES ('Gdansk');
+
+INSERT INTO locations
+VALUES ('not specified');
+
 VALUES (
         RANDOM_UUID(),
         'admin',

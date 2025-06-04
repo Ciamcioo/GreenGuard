@@ -1,3 +1,8 @@
+DROP TABLE IF EXISTS locations;
+CREATE TABLE locations(
+    name VARCHAR(255) PRIMARY KEY
+);
+
 DROP TABLE IF EXISTS gg_users;
 CREATE TABLE gg_users(
     username VARCHAR(100) PRIMARY KEY,
