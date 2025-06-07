@@ -7,6 +7,8 @@ import com.greenguard.green_guard_application.repository.SensorRepository;
 import com.greenguard.green_guard_application.service.exception.SensorAlreadyExistsException;
 import com.greenguard.green_guard_application.service.exception.SensorNotFoundException;
 import com.greenguard.green_guard_application.service.mapper.SensorMapper;
+import com.greenguard.green_guard_application.sensor.SensorRunner;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,7 @@ public class SensorServiceTest {
 
     private SensorRepository sensorRepository;
     private SensorService sensorService;
+    private SensorRunner sensorRunner;
 
     private Sensor testSensor;
     private SensorDTO testSensorDTO;
@@ -58,7 +61,9 @@ public class SensorServiceTest {
         when(sensorMapper.toDTO(testSensor)).thenReturn(testSensorDTO);
         when(sensorMapper.toEntity(testSensorDTO)).thenReturn(testSensor);
 
-        sensorService = new SensorServiceImpl(sensorRepository, sensorMapper);
+        sensorService = new SensorServiceImpl(sensorRepository,
+            sensorMapper,
+            sensorRunner);
     }
 
     @Test
