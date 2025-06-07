@@ -20,6 +20,7 @@ public class ReadingMapperTest {
     private static final String  TEST_SENSOR      = "test sensor";
     private static final Double  TEST_TEMPERATURE = 20.0;
     private static final Double  TEST_HUMIDITY    = 20.0;
+    private static final String  TEST_LOCATION    = "test_location";
     private static final Instant TEST_TIMESTAMP   = LocalDateTime
                                                         .of(2000, 1, 1, 12, 0)
                                                         .toInstant(ZoneOffset.UTC);
@@ -47,6 +48,7 @@ public class ReadingMapperTest {
                 () -> assertEquals(TEST_SENSOR, mappedReadingDTO.sensorName()),
                 () -> assertEquals(TEST_TEMPERATURE, mappedReadingDTO.temperature()),
                 () -> assertEquals(TEST_HUMIDITY, mappedReadingDTO.humidity()),
+                () -> assertEquals(TEST_LOCATION, mappedReadingDTO.locationName()),
                 () -> assertEquals(TEST_TIMESTAMP, mappedReadingDTO.timestamp())
         );
     }

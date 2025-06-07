@@ -7,6 +7,7 @@ public record ReadingDTO(
     String sensorName,
     Double temperature,
     Double humidity,
+    String locationName,
     Instant timestamp
 ) {
 

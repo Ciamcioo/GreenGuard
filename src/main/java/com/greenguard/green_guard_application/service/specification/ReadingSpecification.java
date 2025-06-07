@@ -20,6 +20,10 @@ public class ReadingSpecification {
                 predicates.add(criteriaBuilder.equal(root.get("sensor").get("name"), readingFilterDTO.getSensorName()));
             }
 
+            if (readingFilterDTO.getSensorOwnerUsername() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("sensor").get("user").get("username"), readingFilterDTO.getSensorOwnerUsername()));
+            }
+
             if (readingFilterDTO.getTemperatureFrom() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("temperature"), readingFilterDTO.getTemperatureFrom()));
             }
@@ -44,6 +48,10 @@ public class ReadingSpecification {
             if (readingFilterDTO.getDateTo() != null) {
                 predicates.add(criteriaBuilder.lessThan
                         (root.get("timestamp"), readingFilterDTO.getDateTo().toInstant(ZoneOffset.UTC)));
+            }
+
+            if (readingFilterDTO.getLocationName() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("sensor").get("location").get("name"), readingFilterDTO.getLocationName()));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
