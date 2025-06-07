@@ -18,14 +18,19 @@ public class Sensor {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "username")
-    private String username;
+    @ManyToOne
+    @JoinColumn(name = "username")
+    private User user;
 
     @Column(name = "ip_address")
     private String ipAddress;
 
     @Column(name = "mac_address")
     private String macAddress;
+
+    @ManyToOne
+    @JoinColumn(name = "location")
+    private Location location;
 
     @Column(name = "is_active")
     private Boolean active;
@@ -39,23 +44,24 @@ public class Sensor {
 
     public Sensor() {}
 
-    public Sensor(String name, String username, String ipAddress, String macAddress, Boolean active) {
+    public Sensor(String name, User user, String ipAddress, String macAddress, Location location, Boolean active) {
         this.name = name;
-        this.username = username;
+        this.user = user;
         this.ipAddress = ipAddress;
         this.macAddress = macAddress;
+        this.location = location;
         this.active = active;
     }
 
-    public Sensor(UUID id, String name, String username, String ipAddress, String macAddress, Boolean active) {
+    public Sensor(UUID id, String name, User user, String ipAddress, String macAddress, Location location,   Boolean active) {
         this.id = id;
         this.name = name;
-        this.username = username;
+        this.user = user;
         this.ipAddress = ipAddress;
         this.macAddress = macAddress;
+        this.location = location;
         this.active = active;
     }
-
 
     public UUID getId() {
         return id;
@@ -73,12 +79,12 @@ public class Sensor {
         this.name = name;
     }
 
-    public String getUsername() {
-        return username;
+    public User getUser() {
+        return user;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getIpAddress() {
@@ -103,6 +109,14 @@ public class Sensor {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public List<Reading> getReadings() {

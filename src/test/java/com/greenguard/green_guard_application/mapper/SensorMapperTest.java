@@ -2,6 +2,8 @@ package com.greenguard.green_guard_application.mapper;
 
 import com.greenguard.green_guard_application.model.dto.SensorDTO;
 import com.greenguard.green_guard_application.model.entity.Sensor;
+import com.greenguard.green_guard_application.model.entity.Location;
+import com.greenguard.green_guard_application.model.entity.User;
 import com.greenguard.green_guard_application.service.mapper.SensorMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,12 +17,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(properties = "spring.profiles.active=test")
 public class SensorMapperTest {
-    private static final UUID    TEST_SENSOR_ID           = UUID.randomUUID();
-    private static final String  TEST_SENSOR_NAME         = "Foo";
-    private static final String  TEST_SENSOR_USERNAME     = "John";
-    private static final String  TEST_SENSOR_IP           = "192.168.1.10";
-    private static final String  TEST_SENSOR_MAC          = "DE:AD:BE:EF:12:34";
-    private static final Boolean TEST_SENSOR_ACTIVE       = false;
+    private static final UUID     TEST_SENSOR_ID            = UUID.randomUUID();
+    private static final String   TEST_SENSOR_NAME          = "Foo";
+    private static final String   TEST_SENSOR_USERNAME      = "John";
+    private static final User     TEST_SENSOR_USER          = new User(TEST_SENSOR_USERNAME, "password");
+    private static final String   TEST_SENSOR_IP            = "192.168.1.10";
+    private static final String   TEST_SENSOR_MAC           = "DE:AD:BE:EF:12:34";
+    private static final String   TEST_SENSOR_LOCATION_NAME = "Location";
+    private static final Boolean  TEST_SENSOR_ACTIVE        = false;
 
     private Sensor test_sensor_entity;
     private SensorDTO test_sensor_dto;
@@ -32,14 +36,15 @@ public class SensorMapperTest {
     void setup() {
         test_sensor_entity = new Sensor(TEST_SENSOR_ID,
                                         TEST_SENSOR_NAME,
-                                        TEST_SENSOR_USERNAME,
+                                        TEST_SENSOR_USER,
                                         TEST_SENSOR_IP,
                                         TEST_SENSOR_MAC,
+                                        new Location(TEST_SENSOR_LOCATION_NAME),
                                         TEST_SENSOR_ACTIVE);
 
         test_sensor_dto = new SensorDTO(TEST_SENSOR_NAME,
-                                        TEST_SENSOR_USERNAME,
                                         TEST_SENSOR_IP,
+                                        TEST_SENSOR_LOCATION_NAME,
                                         TEST_SENSOR_ACTIVE);
     }
 
@@ -50,8 +55,8 @@ public class SensorMapperTest {
 
         assertAll(
                 () -> assertEquals(TEST_SENSOR_NAME, resultSensorDTO.name()),
-                () -> assertEquals(TEST_SENSOR_USERNAME, resultSensorDTO.username()),
                 () -> assertEquals(TEST_SENSOR_IP, resultSensorDTO.ipAddress()),
+                () -> assertEquals(TEST_SENSOR_LOCATION_NAME, resultSensorDTO.locationName()),
                 () -> assertEquals(TEST_SENSOR_ACTIVE, resultSensorDTO.active())
         );
     }
@@ -64,10 +69,11 @@ public class SensorMapperTest {
         assertAll(
                 () -> assertNull(resultSensor.getId()),
                 () -> assertEquals(TEST_SENSOR_NAME, resultSensor.getName()),
-                () -> assertEquals(TEST_SENSOR_USERNAME, resultSensor.getUsername()),
+                () -> assertNull(resultSensor.getUser()),
                 () -> assertEquals(TEST_SENSOR_IP, resultSensor.getIpAddress()),
                 () -> assertNull(resultSensor.getMacAddress()),
                 () -> assertEquals(TEST_SENSOR_ACTIVE, resultSensor.getActive()),
+                () -> assertNull(resultSensor.getLocation()),
                 () -> assertTrue(resultSensor.getReadings().isEmpty())
         );
     }

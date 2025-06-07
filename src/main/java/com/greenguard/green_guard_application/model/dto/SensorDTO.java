@@ -4,9 +4,8 @@ import java.util.Objects;
 
 public record SensorDTO(
         String name,
-        String username,
         String ipAddress,
-//        LocationDTO locationDTO,
+        String locationName,
         Boolean active
 ) {
 
