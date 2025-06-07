@@ -43,7 +43,7 @@ public class UserRestController {
     @EnableMethodLog
     public ResponseEntity<Set<Location>> deleteFavoriteLocation(@PathVariable("name") String locationToDelete) {
         return ResponseEntity.ok(
-                userService.addFavoriteLocation(
+                userService.removeFavoriteLocation(
                         SecurityContextHolder.getContext().getAuthentication().getName(),
                         locationToDelete
                 )

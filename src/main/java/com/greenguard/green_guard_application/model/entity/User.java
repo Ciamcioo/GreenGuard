@@ -2,10 +2,7 @@ package com.greenguard.green_guard_application.model.entity;
 
 import jakarta.persistence.*;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity(name = "gg_users")
 public class User {
@@ -60,7 +57,7 @@ public class User {
     }
 
     public void setFavoriteLocations(Set<Location> favoriteLocations) {
-        this.favoriteLocations = Set.copyOf(favoriteLocations);
+        this.favoriteLocations = new HashSet<>(favoriteLocations);
     }
 
     @Override

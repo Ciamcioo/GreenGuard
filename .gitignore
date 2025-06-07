@@ -35,4 +35,4 @@ build/
 .vscode/
 
 # Any txt files
-gg_mindlogs.txt
+*.txt
