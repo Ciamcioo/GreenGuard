@@ -1,8 +1,10 @@
 package com.greenguard.green_guard_application.util;
 
 import com.greenguard.green_guard_application.model.dto.ReadingDTO;
+import com.greenguard.green_guard_application.model.entity.Location;
 import com.greenguard.green_guard_application.model.entity.Reading;
 import com.greenguard.green_guard_application.model.entity.Sensor;
+import com.greenguard.green_guard_application.model.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,9 +19,10 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ReadingBuilderTest {
     private static final Sensor  DEF_SENSOR      = new Sensor(null,
                                                              "test sensor",
-                                                             "test user",
+                                                             new User("test_user", "password"),
                                                              "127.0.0.1",
                                                              "4A:9F:2C:75:B1:E3",
+                                                             new Location("test location"),
                                                              false);
     private static final Double  DEF_TEMPERATURE = 20.0;
     private static final Double  DEF_HUMIDITY    = 20.0;
@@ -27,16 +30,18 @@ public class ReadingBuilderTest {
                                                         .of(2000, 1, 1, 12, 0)
                                                         .toInstant(ZoneOffset.UTC);
 
-    private static final UUID    TEST_UUID        = UUID.randomUUID();
-    private static final Sensor  TEST_SENSOR      = new Sensor(null,
+    private static final UUID     TEST_UUID        = UUID.randomUUID();
+    private static final Location TEST_LOCATION = new Location("location test");
+    private static final Sensor   TEST_SENSOR      = new Sensor(null,
                                                                "sensor name",
                                                                null,
                                                                null,
                                                                null,
+                                                               TEST_LOCATION,
                                                                true);
-    private static final Double  TEST_TEMPERATURE = 100.0;
-    private static final Double  TEST_HUMIDITY    = 10.0;
-    private static final Instant TEST_TIMESTAMP   = LocalDateTime
+    private static final Double   TEST_TEMPERATURE = 100.0;
+    private static final Double   TEST_HUMIDITY    = 10.0;
+    private static final Instant  TEST_TIMESTAMP   = LocalDateTime
                                                         .of(2010, 12, 1, 20, 0)
                                                         .toInstant(ZoneOffset.UTC);
 
@@ -111,10 +116,11 @@ public class ReadingBuilderTest {
         ReadingDTO resultReadingDTO = readingBuilder.buildReadingDTO();
 
         assertAll(
-                () -> assertEquals(TEST_SENSOR.getName(), resultReadingDTO.sensorName()),
-                () -> assertEquals(TEST_TEMPERATURE,      resultReadingDTO.temperature()),
-                () -> assertEquals(TEST_HUMIDITY,         resultReadingDTO.humidity()),
-                () -> assertEquals(TEST_TIMESTAMP,        resultReadingDTO.timestamp())
+                () -> assertEquals(TEST_SENSOR.getName(),   resultReadingDTO.sensorName()),
+                () -> assertEquals(TEST_TEMPERATURE,        resultReadingDTO.temperature()),
+                () -> assertEquals(TEST_HUMIDITY,           resultReadingDTO.humidity()),
+                () -> assertEquals(TEST_LOCATION.getName(), resultReadingDTO.locationName()),
+                () -> assertEquals(TEST_TIMESTAMP,          resultReadingDTO.timestamp())
         );
     }
 }

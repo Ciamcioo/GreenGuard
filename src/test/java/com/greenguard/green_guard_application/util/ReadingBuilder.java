@@ -1,8 +1,10 @@
 package com.greenguard.green_guard_application.util;
 
 import com.greenguard.green_guard_application.model.dto.ReadingDTO;
+import com.greenguard.green_guard_application.model.entity.Location;
 import com.greenguard.green_guard_application.model.entity.Reading;
 import com.greenguard.green_guard_application.model.entity.Sensor;
+import com.greenguard.green_guard_application.model.entity.User;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -55,9 +57,10 @@ public class ReadingBuilder {
         this.id = UUID.randomUUID();
         this.sensor = new Sensor(null,
                                 "test sensor",
-                                "test user",
+                                new User("test_username", "password"),
                                 "127.0.0.1",
                                 "4A:9F:2C:75:B1:E3",
+                                new Location("test_location"),
                                 false);
         this.temperature = 20.0;
         this.humidity = 20.0;
@@ -80,6 +83,7 @@ public class ReadingBuilder {
         return new ReadingDTO(this.sensor.getName(),
                               this.temperature,
                               this.humidity,
+                              this.sensor.getLocation().getName(),
                               this.timestamp);
 
     }

@@ -1,10 +1,8 @@
 package com.greenguard.green_guard_application.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
-import java.util.Objects;
+import java.util.*;
 
 @Entity(name = "gg_users")
 public class User {
@@ -16,6 +14,13 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @ManyToMany
+    @JoinTable(name = "users_locations",
+               joinColumns = @JoinColumn(name = "username"),
+               inverseJoinColumns = @JoinColumn(name = "location_name")
+    )
+    private Set<Location> favoriteLocations;
+
     public User() {
 
     }
@@ -23,6 +28,12 @@ public class User {
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+    }
+
+    public User(String username, String password, Collection<Location> favoriteLocations) {
+        this.username = username;
+        this.password = password;
+        this.favoriteLocations = Set.of(favoriteLocations.toArray(new Location[0]));
     }
 
     public String getUsername() {
@@ -41,6 +52,13 @@ public class User {
         this.password = password;
     }
 
+    public Set<Location> getFavoriteLocations() {
+        return new HashSet<>(favoriteLocations);
+    }
+
+    public void setFavoriteLocations(Set<Location> favoriteLocations) {
+        this.favoriteLocations = new HashSet<>(favoriteLocations);
+    }
 
     @Override
     public boolean equals(Object o) {

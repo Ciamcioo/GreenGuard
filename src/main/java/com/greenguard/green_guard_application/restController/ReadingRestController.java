@@ -5,6 +5,7 @@ import com.greenguard.green_guard_application.model.dto.ReadingFilterDTO;
 import com.greenguard.green_guard_application.service.ReadingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,11 +24,19 @@ public class ReadingRestController {
 
     @GetMapping("/reading")
     public ResponseEntity<List<ReadingDTO>> getReadings(@ModelAttribute ReadingFilterDTO readingFilterDTO) {
+       readingFilterDTO.setSensorOwnerUsername(SecurityContextHolder.getContext().getAuthentication().getName());
        return ResponseEntity.ok(readingService.findAll(readingFilterDTO));
     }
 
     @GetMapping("/reading/last")
     public ResponseEntity<ReadingDTO> getLastReading(@ModelAttribute ReadingFilterDTO readingFilterDTO) {
+        readingFilterDTO.setSensorOwnerUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         return ResponseEntity.ok(readingService.findLastReading(readingFilterDTO));
+    }
+
+    @GetMapping("/reading/favorite-locations")
+    public ResponseEntity<List<ReadingDTO>> getFavoriteLocationReading(@ModelAttribute ReadingFilterDTO readingFilterDTO) {
+        readingFilterDTO.setSensorOwnerUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        return ResponseEntity.ok(readingService.getFavoriteLocationReadings(readingFilterDTO));
     }
 }

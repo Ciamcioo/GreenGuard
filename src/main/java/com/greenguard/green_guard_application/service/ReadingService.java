@@ -10,4 +10,6 @@ public interface ReadingService {
    List<ReadingDTO> findAll(ReadingFilterDTO readingFilterDTO);
 
    ReadingDTO findLastReading(ReadingFilterDTO readingFilterDTO);
+
+   List<ReadingDTO> getFavoriteLocationReadings(ReadingFilterDTO readingFilterDTO);
 }

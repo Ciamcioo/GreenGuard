@@ -5,13 +5,18 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
+
 public interface SensorService {
 
-    SensorDTO getSensor(String name);
+    List<SensorDTO> getSensors(@NotNull String username);
 
-    String addSensor(@NotNull SensorDTO sensorDTO);
+    SensorDTO getSensor(@NotNull String username, String name);
 
-    void deleteSensor(String name);
+    String addSensor(@NotNull String ownerUsername, @NotNull SensorDTO sensorDTO);
 
-    void updateSensorName(String name, String newName);
+    void deleteSensor(String ownerUsername, String name);
+
+    void updateSensorName(String ownerUsername, String name, String newName);
+
 }
