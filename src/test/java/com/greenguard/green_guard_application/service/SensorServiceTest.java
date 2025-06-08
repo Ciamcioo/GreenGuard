@@ -19,11 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +27,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(properties = "spring.profiles.active=test")
 public class SensorServiceTest {
 
     private static final UUID     TEST_SENSOR_ID            = UUID.randomUUID();
@@ -46,8 +41,7 @@ public class SensorServiceTest {
 
     private static final String SENSOR_NOT_FOUND_MESSAGE = String.format("Sensor with name: %s not found!", TEST_SENSOR_NAME);
 
-    @Value("${default.location.name}")
-    private static String DEFAULT_LOCATION_NAME;
+    private static final String DEFAULT_LOCATION_NAME = "not specified";
     private static final Location DEFAULT_LOCATION = new Location(DEFAULT_LOCATION_NAME);
 
     private SensorRepository sensorRepository;
@@ -76,7 +70,8 @@ public class SensorServiceTest {
                                       TEST_SENSOR_ACTIVE);
 
         sensorRepository = mock(SensorRepository.class);
-        when(sensorRepository.findSensorByUsernameAndName(TEST_SENSOR_USERNAME, TEST_SENSOR_NAME)).thenReturn(Optional.of(testSensor));
+        when(sensorRepository.findSensorByUsernameAndName(TEST_SENSOR_USERNAME, TEST_SENSOR_NAME)).thenReturn(Optional.empty());
+        when(sensorRepository.findSensorByUsernameAndIpAddress(TEST_SENSOR_USERNAME, testSensorDTO.ipAddress())).thenReturn(Optional.empty());
 
         locationRepository = mock(LocationRepository.class);
         when(locationRepository.findById(TEST_SENSOR_LOCATION_NAME)).thenReturn(Optional.of(TEST_SENSOR_LOCATION));
@@ -128,12 +123,16 @@ public class SensorServiceTest {
     @Test
     @DisplayName("Returned SensorDTO name should be equal to argument.")
     void getSensorShouldReturnSensorDTOWithNameEqualToArgument() {
+        when(sensorRepository.findSensorByUsernameAndName(TEST_SENSOR_USERNAME, TEST_SENSOR_NAME)).thenReturn(Optional.of(testSensor));
+
         assertEquals(TEST_SENSOR_NAME, sensorService.getSensor(TEST_SENSOR_USERNAME, TEST_SENSOR_NAME).name());
     }
 
     @Test
     @DisplayName("Method getSensor() should make a call to sensor repository passing the argument name.")
     void getSensorShouldMakeCallToSensorRepository() {
+        when(sensorRepository.findSensorByUsernameAndName(TEST_SENSOR_USERNAME, TEST_SENSOR_NAME)).thenReturn(Optional.of(testSensor));
+
         sensorService.getSensor(TEST_SENSOR_USERNAME, TEST_SENSOR_NAME);
 
         verify(sensorRepository).findSensorByUsernameAndName(TEST_SENSOR_USERNAME, TEST_SENSOR_NAME);
@@ -144,8 +143,7 @@ public class SensorServiceTest {
     void getSensorThrowSensorNotFoundException() {
         when(sensorRepository.findSensorByUsernameAndName(TEST_SENSOR_USERNAME, TEST_SENSOR_NAME)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(SensorNotFoundException.class, () -> sensorService.getSensor(TEST_SENSOR_USERNAME, TEST_SENSOR_NAME));
-        assertEquals(SENSOR_NOT_FOUND_MESSAGE, exception.getMessage());
+        assertThrows(SensorNotFoundException.class, () -> sensorService.getSensor(TEST_SENSOR_USERNAME, TEST_SENSOR_NAME));
     }
 
     @Test
@@ -161,21 +159,28 @@ public class SensorServiceTest {
     }
 
     @Test
-    @DisplayName("Test sensor should throw SensorAlreadyExists() if sensorDTO with provided ip address already exists in database")
-    void addSensorShouldThrowSensorAlreadyExists() {
+    @DisplayName("Test sensor should throw SensorAlreadyExists() if sensorDTO with provided ip address already exists in database for a user")
+    void addSensorShouldThrowSensorAlreadyExistsForIpAddress() {
         String ipAddressDuplicate = TEST_SENSOR_IP;
 
-        when(sensorRepository.findSensorByIpAddress(ipAddressDuplicate)).thenReturn(Optional.of(testSensor));
+        when(sensorRepository.findSensorByUsernameAndIpAddress(TEST_SENSOR_USERNAME, ipAddressDuplicate)).thenReturn(Optional.of(testSensor));
 
         assertThrows(SensorAlreadyExistsException.class, () -> sensorService.addSensor(TEST_SENSOR_USERNAME, testSensorDTO));
-        verify(sensorRepository).findSensorByIpAddress(ipAddressDuplicate);
+    }
+
+    @Test
+    @DisplayName("Test sensor should throw SensorAlreadyExists() if sensorDTO with provided name already exists in database for a user")
+    void addSensorShouldThrowSensorAlreadyExistsForSensorName() {
+        String sensorNameDuplicated = TEST_SENSOR_NAME;
+
+        when(sensorRepository.findSensorByUsernameAndName(TEST_SENSOR_USERNAME, sensorNameDuplicated)).thenReturn(Optional.of(testSensor));
+
+        assertThrows(SensorAlreadyExistsException.class, () -> sensorService.addSensor(TEST_SENSOR_USERNAME, testSensorDTO));
     }
 
     @Test
     @DisplayName("Method addSensor() should make a call to repository to save the sensor to database")
     void addSensorShouldSaveProvidedData() {
-        when(sensorRepository.findSensorByIpAddress(testSensorDTO.ipAddress())).thenReturn(Optional.empty());
-
         sensorService.addSensor(TEST_SENSOR_USERNAME, testSensorDTO);
 
         verify(sensorRepository).save(testSensor);
@@ -185,7 +190,6 @@ public class SensorServiceTest {
     @DisplayName("Method addSensor() should not try to save a sensor with the location objet set to null")
     void addSensorShouldNotTryToSaveLocationWithNullValue() {
         testSensor.setLocation(null);
-        when(sensorRepository.findSensorByIpAddress(testSensorDTO.ipAddress())).thenReturn(Optional.empty());
         when(locationRepository.findById(TEST_SENSOR_LOCATION_NAME)).thenReturn(Optional.empty());
 
 
@@ -202,7 +206,6 @@ public class SensorServiceTest {
     void addSensorShouldThrowDefaultLocationException() {
         testSensor.setLocation(null);
 
-        when(sensorRepository.findSensorByIpAddress(testSensorDTO.ipAddress())).thenReturn(Optional.empty());
         when(locationRepository.findById(TEST_SENSOR_LOCATION_NAME)).thenReturn(Optional.empty());
         when(locationRepository.findById(DEFAULT_LOCATION_NAME)).thenReturn(Optional.empty());
 
@@ -214,10 +217,6 @@ public class SensorServiceTest {
     @DisplayName("Method addSensor() should not try to save a sensor with the user set to null")
     void addSensorShouldNotSaveSensorToDatabaseIfUserIsNull() {
         testSensor.setUser(null);
-
-        when(sensorRepository.findSensorByIpAddress(testSensorDTO.ipAddress())).thenReturn(Optional.empty());
-//        when(userRepository.findById(TEST_SENSOR_USERNAME)).thenReturn(Optional.empty());
-
 
         sensorService.addSensor(TEST_SENSOR_USERNAME, testSensorDTO);
 
@@ -233,10 +232,6 @@ public class SensorServiceTest {
     void addSensorShouldSaveSensorToDatabaseWithUseWhichUsernameIsMatchingUsernameFromSensorDTO() {
         testSensor.setUser(null);
 
-        when(sensorRepository.findSensorByIpAddress(testSensorDTO.ipAddress())).thenReturn(Optional.empty());
-//        when(userRepository.findById(TEST_SENSOR_USERNAME)).thenReturn(Optional.empty());
-
-
         sensorService.addSensor(TEST_SENSOR_USERNAME, testSensorDTO);
 
         ArgumentCaptor<Sensor> sensorCaptor = ArgumentCaptor.forClass(Sensor.class);
@@ -250,9 +245,7 @@ public class SensorServiceTest {
     void addSensorShouldThrowUserNotFoundException() {
         testSensor.setUser(null);
 
-        when(sensorRepository.findSensorByIpAddress(testSensorDTO.ipAddress())).thenReturn(Optional.empty());
         when(userRepository.findById(TEST_SENSOR_USERNAME)).thenReturn(Optional.empty());
-
 
         assertThrows(UserNotFoundException.class, () -> sensorService.addSensor(TEST_SENSOR_USERNAME, testSensorDTO));
 
@@ -264,7 +257,6 @@ public class SensorServiceTest {
     void addSensorShouldSaveSensorWithAppropriateUser() {
         testSensor.setUser(null);
 
-        when(sensorRepository.findSensorByIpAddress(testSensorDTO.ipAddress())).thenReturn(Optional.empty());
         sensorService.addSensor(TEST_SENSOR_USERNAME, testSensorDTO);
 
         ArgumentCaptor<Sensor> sensorCaptor = ArgumentCaptor.forClass(Sensor.class);

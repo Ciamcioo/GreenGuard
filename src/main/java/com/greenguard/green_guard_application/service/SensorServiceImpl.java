@@ -17,9 +17,10 @@ import com.greenguard.green_guard_application.service.exception.SensorNotFoundEx
 import com.greenguard.green_guard_application.service.exception.UserNotFoundException;
 import com.greenguard.green_guard_application.service.mapper.SensorMapper;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -29,8 +30,8 @@ import java.util.Optional;
 @Service
 @Validated
 public class SensorServiceImpl implements SensorService {
-    @Value("${default.location.name}")
-    private static String DEFAULT_LOCATION_NAME;
+    private static final Logger LOG = LoggerFactory.getLogger(SensorServiceImpl.class);
+    private static final String DEFAULT_LOCATION_NAME = "not specified";
 
     private final SensorRepository sensorRepository;
     private final LocationRepository locationRepository;
@@ -47,6 +48,7 @@ public class SensorServiceImpl implements SensorService {
         this.sensorRunner = sensorRunner;
     }
 
+
     @Override
     public List<SensorDTO> getSensors(String username) {
         User targetUser = userRepository.findById(username)
@@ -60,7 +62,7 @@ public class SensorServiceImpl implements SensorService {
     @EnableMethodLog
     public SensorDTO getSensor(@NotNull String username, String name) {
         Sensor sensor = sensorRepository.findSensorByUsernameAndName(username, name)
-                                        .orElseThrow(() -> new SensorNotFoundException(name));
+                                        .orElseThrow(() -> new SensorNotFoundException("Sensor with specified name not found"));
 
         return sensorMapper.toDTO(sensor);
     }
@@ -68,11 +70,15 @@ public class SensorServiceImpl implements SensorService {
     @Override
     @EnableMethodLog
     public String addSensor(@NotNull String ownerUsername, @NotNull SensorDTO sensorDTO) throws DefaultLocationException {
-        Optional<Sensor> searchSensorResult = sensorRepository.findSensorByIpAddress(sensorDTO.ipAddress());
-
-        if (searchSensorResult.isPresent()) {
-            throw new SensorAlreadyExistsException();
+        if (sensorRepository.findSensorByUsernameAndName(ownerUsername, sensorDTO.name()).isPresent()) {
+            throw new SensorAlreadyExistsException("Sensor with provided name already exists");
         }
+        LOG.trace("Sensor name is valid");
+
+        if (sensorRepository.findSensorByUsernameAndIpAddress(ownerUsername, sensorDTO.ipAddress()).isPresent()) {
+            throw new SensorAlreadyExistsException("Sensor with provided ip already exists");
+        }
+        LOG.trace("Sensor ip is valid");
 
         Sensor sensorToPersist = sensorMapper.toEntity(sensorDTO);
 
@@ -93,7 +99,7 @@ public class SensorServiceImpl implements SensorService {
 
         sensorRepository.save(sensorToPersist);
 
-        if(sensorToPersist.getActive() == true) {
+        if(sensorToPersist.getActive()) {
             sensorRunner.addActiveSensor(sensorToPersist);
         }
 
@@ -102,16 +108,16 @@ public class SensorServiceImpl implements SensorService {
 
     @Override
     @EnableMethodCallLog
-    public void deleteSensor(String ownerUsername, String name) {
-        Optional<Sensor> sensorOpt  = sensorRepository.findSensorByUsernameAndName(ownerUsername, name);
+    public void deleteSensor(String ownerUsername, String ipAddress) {
+        Optional<Sensor> sensorOpt  = sensorRepository.findSensorByUsernameAndIpAddress(ownerUsername, ipAddress);
 
         if (sensorOpt.isEmpty()) {
-            throw new SensorNotFoundException(name);
+            throw new SensorNotFoundException("Sensor with specified ip address not found");
         }
 
         Sensor sensor = sensorOpt.get();
 
-        if(sensor.getActive() == true) {
+        if(sensor.getActive()) {
             sensorRunner.deleteActiveSensor(sensor);
         }
 
@@ -125,7 +131,7 @@ public class SensorServiceImpl implements SensorService {
         Optional<Sensor> sensor  = sensorRepository.findSensorByUsernameAndName(ownerUsername, name);
 
         if (sensor.isEmpty()) {
-            throw new SensorNotFoundException(name);
+            throw new SensorNotFoundException("Sensor with specified name not found");
         }
 
         sensorRepository.updateSensorName(name, newName);

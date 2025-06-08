@@ -12,21 +12,17 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.List;
 
 @Repository
 public interface SensorRepository extends JpaRepository<Sensor, UUID> {
 
     List<Sensor> findSensorByUser(User user);
 
-    Optional<Sensor> findSensorByName(String name);
-
     @Query("SELECT s FROM Sensor s WHERE s.user.username = :username AND s.name = :name")
     Optional<Sensor> findSensorByUsernameAndName(@Param("username") String username, @Param("name") String name);
 
-    Optional<Sensor> findSensorByIpAddress(String ipAddress);
-
-    void deleteSensorByName(String name);
+    @Query("SELECT s FROM Sensor s WHERE s.user.username = :username AND s.ipAddress = :ipAddress")
+    Optional<Sensor> findSensorByUsernameAndIpAddress(@Param("username") String username, @Param("ipAddress") String ipAddress);
 
     List<Sensor> findByActiveTrue();
 
