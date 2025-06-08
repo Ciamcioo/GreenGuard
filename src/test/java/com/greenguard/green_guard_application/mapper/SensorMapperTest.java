@@ -4,19 +4,25 @@ import com.greenguard.green_guard_application.model.dto.SensorDTO;
 import com.greenguard.green_guard_application.model.entity.Sensor;
 import com.greenguard.green_guard_application.model.entity.Location;
 import com.greenguard.green_guard_application.model.entity.User;
+import com.greenguard.green_guard_application.service.mapper.LocationMapper;
 import com.greenguard.green_guard_application.service.mapper.SensorMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = "spring.profiles.active=test")
 public class SensorMapperTest {
+
     private static final UUID     TEST_SENSOR_ID            = UUID.randomUUID();
     private static final String   TEST_SENSOR_NAME          = "Foo";
     private static final String   TEST_SENSOR_USERNAME      = "John";
@@ -29,8 +35,7 @@ public class SensorMapperTest {
     private Sensor test_sensor_entity;
     private SensorDTO test_sensor_dto;
 
-    @Autowired
-    private SensorMapper sensorMapper;
+    private final SensorMapper sensorMapper = Mappers.getMapper(SensorMapper.class);
 
     @BeforeEach
     void setup() {

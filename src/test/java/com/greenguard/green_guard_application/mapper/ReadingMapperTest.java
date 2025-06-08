@@ -3,11 +3,17 @@ package com.greenguard.green_guard_application.mapper;
 import com.greenguard.green_guard_application.model.dto.ReadingDTO;
 import com.greenguard.green_guard_application.model.entity.Reading;
 import com.greenguard.green_guard_application.service.mapper.ReadingMapper;
+import com.greenguard.green_guard_application.service.mapper.SensorMapper;
 import com.greenguard.green_guard_application.util.ReadingBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mapstruct.factory.Mappers;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -15,7 +21,6 @@ import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = "spring.profiles.active=test")
 public class ReadingMapperTest {
     private static final String  TEST_SENSOR      = "test sensor";
     private static final Double  TEST_TEMPERATURE = 20.0;
@@ -24,8 +29,8 @@ public class ReadingMapperTest {
     private static final Instant TEST_TIMESTAMP   = LocalDateTime
                                                         .of(2000, 1, 1, 12, 0)
                                                         .toInstant(ZoneOffset.UTC);
-    @Autowired
-    ReadingMapper readingMapper;
+
+    private final ReadingMapper readingMapper = Mappers.getMapper(ReadingMapper.class);
 
 
     @Test
