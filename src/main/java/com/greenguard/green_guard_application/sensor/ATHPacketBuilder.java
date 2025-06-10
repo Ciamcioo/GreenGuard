@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.greenguard.green_guard_application.sensor.CommonPacket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* Air Temperature and Humidity packet builder and parser */
 public class ATHPacketBuilder {
@@ -48,7 +50,7 @@ public class ATHPacketBuilder {
 
     public static final byte DHT22_READ_SUCCESS = 0x1;
     public static final byte DHT22_READ_FAILURE = 0x0;
-
+    private static final Logger log = LoggerFactory.getLogger(ATHPacketBuilder.class);
 
 
     public static class ATHData {
@@ -98,7 +100,7 @@ public class ATHPacketBuilder {
             out.flush();
             return true;
         } catch (IOException e) {
-            System.err.println("Failed to send ATH request: " + e.getMessage());
+            ATHPacketBuilder.log.error("Failed to send ATH request: {}",  e.getMessage());
             return false;
         }
     }
@@ -106,8 +108,8 @@ public class ATHPacketBuilder {
     public static ATHData readATHReply(InputStream in) {
         ByteBuffer buffer = ByteBuffer.allocate(REPLY_DHT22_PACKET_LENGTH);
 
-        if(CommonPacket.readSome(in, buffer, CommonPacket.COMMON_PACKET_LENGTH,
-              CommonPacket.READSOME_MS) == false)
+        if(!CommonPacket.readSome(in, buffer, CommonPacket.COMMON_PACKET_LENGTH,
+                CommonPacket.READSOME_MS))
             return null;
 
         int packetLength = CommonPacket.extractLength(buffer.array());
@@ -118,7 +120,7 @@ public class ATHPacketBuilder {
 
         // NACK?
         if (type == NackPacket.NACK_TYPE) {
-            System.out.println("Received NACK");
+            ATHPacketBuilder.log.trace("Received NACK");
             return ATHData.invalid();
         }
 
@@ -128,22 +130,22 @@ public class ATHPacketBuilder {
         }
 
 
-        if(CommonPacket.readSome(in, buffer, REPLY_DHT22_SUCCESS_SIZE,
-              CommonPacket.READSOME_MS) == false)
+        if(!CommonPacket.readSome(in, buffer, REPLY_DHT22_SUCCESS_SIZE,
+                CommonPacket.READSOME_MS))
             return null;
 
         buffer.position(REPLY_DHT22_SUCCESS_POS);
 
         byte success = buffer.get();
         if (success != REPLY_DHT22_SUCCESS) {
-            System.err.println("DHT22 transaction error");
+            ATHPacketBuilder.log.error("DHT22 transaction error");
             return ATHData.invalid();
         }
 
         buffer.position(REPLY_DHT22_TEMPERATURE_POS);
 
-        if(CommonPacket.readSome(in, buffer, REPLY_DHT22_DATA_SIZE,
-              CommonPacket.READSOME_MS) == false)
+        if(!CommonPacket.readSome(in, buffer, REPLY_DHT22_DATA_SIZE,
+                CommonPacket.READSOME_MS))
             return null;
 
         buffer.position(REPLY_DHT22_TEMPERATURE_POS);

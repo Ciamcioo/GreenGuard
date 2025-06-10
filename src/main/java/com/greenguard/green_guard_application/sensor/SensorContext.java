@@ -7,8 +7,13 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 import com.greenguard.green_guard_application.sensor.ATHPacketBuilder;
+import com.greenguard.green_guard_application.service.ReadingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class SensorContext implements AutoCloseable{
+    private static final Logger log = LoggerFactory.getLogger(SensorContext.class);
     private final UUID id;
     private final String ip;
     private final int port = 5555;
@@ -16,6 +21,9 @@ public class SensorContext implements AutoCloseable{
     private long timeout = 5000; // 5000ms = 5s
     private boolean connected = false;
     private Instant lastTimeOut = Instant.now();
+    private ATHPacketBuilder.ATHData recentReading;
+    private Boolean isDataNew = false;
+
 
     public SensorContext(UUID id, String ip) {
         this.id = id;
@@ -39,25 +47,21 @@ public class SensorContext implements AutoCloseable{
 
     public boolean connect()
     {
-      if(this.connected == true)
-        return this.connected;
+        if(this.connected)
+            return true;
 
-      if(hasTimedOut() == false)
-        return false;
+        if(!hasTimedOut())
+            return false;
 
-      System.out.println("Connecting to sensor ID=" +
-                         this.id +
-                         " at " + this.ip +
-                         ":" +
-                         this.port);
+        log.info("Connecting to sensor ID={} at {}:{}", this.id, this.ip, this.port);
 
       try {
           this.socket = new Socket(this.ip, this.port);
           this.connected = true;
-          System.out.println("Sensor IP: " + this.ip + " connected!");
+          log.info("Sensor IP: {} connected!", this.ip);
       } catch (IOException e) {
+          log.error("Failed to connect to sensor IP: {}", this.ip);
           this.connected = false;
-          System.err.println("Failed to connect to sensor IP: " + this.ip);
       }
 
       this.lastTimeOut = Instant.now();
@@ -76,7 +80,7 @@ public class SensorContext implements AutoCloseable{
     public boolean requestData()
     {
       /* Sanity check */
-      if(this.connected == false || this.socket == null || this.socket.isClosed())
+      if(!this.connected || this.socket == null || this.socket.isClosed())
       {
           this.connected = false;
           return false;
@@ -89,31 +93,28 @@ public class SensorContext implements AutoCloseable{
     private boolean sendATHRequest()
     {
       try {
-        if(ATHPacketBuilder.sendATHRequest(this.socket.getOutputStream()) == false) {
-            System.err.println("Failed to send request to sensor IP: " +
-                this.ip +
-                ". Closing connection.");
+        if(!ATHPacketBuilder.sendATHRequest(this.socket.getOutputStream())) {
+            log.error("Failed to send request to sensor IP: {}. Closing connection.", this.ip);
 
             this.connected = false;
 
             try {
                 this.socket.close();
             } catch (IOException ex) {
-                System.err.println("Failed to close socket: " + ex.getMessage());
+                log.error("Failed to close socket: {}", ex.getMessage());
             }
 
             return false;
         }
       } catch (IOException e) {
-        System.err.println("IOException when sending request to sensor IP: " +
-                           this.ip + ": " + e.getMessage());
+          log.error("IOException when sending request to sensor IP: {}: {}", this.ip, e.getMessage());
 
         this.connected = false;
 
         try {
             this.socket.close();
         } catch (IOException ex) {
-            System.err.println("Failed to close socket: " + ex.getMessage());
+            log.error("Failed to close socket: {}", ex.getMessage());
         }
 
         return false;
@@ -135,26 +136,27 @@ public class SensorContext implements AutoCloseable{
             try {
                 this.socket.close();
             } catch (IOException ex) {
-                System.err.println("Failed to close socket: " + ex.getMessage());
+                log.error("Failed to close socket: {}", ex.getMessage());
             }
 
             return false;
         }
 
-        if(data.isValid() == false)
+        if(!data.isValid())
           return false;
 
-        System.out.println("Sensor at " + this.ip + " = " + data);
+        this.recentReading = data;
+        this.isDataNew = true;
+        log.info("Sensor at {} = {}", this.ip, data);
 
       } catch (IOException e) {
-        System.err.println("IOException when reading from sensor IP: " +
-                             this.ip + ": " + e.getMessage());
+          log.error("IOException when sending request to sensor IP: {}: {}", this.ip, e.getMessage());
           this.connected = false;
 
           try {
               this.socket.close();
           } catch (IOException ex) {
-              System.err.println("Failed to close socket: " + ex.getMessage());
+              log.error("Failed to close socket: {}", ex.getMessage());
           }
 
           return false;
@@ -163,14 +165,19 @@ public class SensorContext implements AutoCloseable{
       return true;
     }
 
-    private boolean getATHParams()
-    {
-      if(this.sendATHRequest() == false)
-        return false;
+    private boolean getATHParams() {
+        return this.sendATHRequest() && this.getATHResponse();
+    }
 
-      if(this.getATHResponse() == false)
-        return false;
+    public ATHPacketBuilder.ATHData getRecentReading() {
+        return recentReading;
+    }
 
-      return true;
+    public Boolean getDataNew() {
+        return isDataNew;
+    }
+
+    public void setDataNew(Boolean dataNew) {
+        isDataNew = dataNew;
     }
 }

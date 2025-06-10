@@ -9,20 +9,21 @@ import com.greenguard.green_guard_application.model.entity.User;
 import com.greenguard.green_guard_application.repository.ReadingRepository;
 import com.greenguard.green_guard_application.repository.UserRepository;
 import com.greenguard.green_guard_application.service.exception.ReadingNotFoundException;
+import com.greenguard.green_guard_application.service.exception.SensorNotFoundException;
 import com.greenguard.green_guard_application.service.exception.UserNotFoundException;
 import com.greenguard.green_guard_application.service.mapper.ReadingMapper;
 import com.greenguard.green_guard_application.service.specification.ReadingSpecification;
 import com.greenguard.green_guard_application.util.ReadingBuilder;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,34 +36,31 @@ public class ReadingServiceTest {
     private static final Location LOCATION_RZESZOW = new Location(LOCATION_NAME_RZESZOW);
     private static final Location LOCATION_WROCLAW = new Location(LOCATION_NAME_WROCLAW);
 
-    static MockedStatic<ReadingSpecification> readingSpecification;
+    private static MockedStatic<ReadingSpecification> readingSpecification;
 
-    static ReadingFilterDTO validReadingDTOFilter;
-    static ReadingFilterDTO defaultReadingFilterDTO;
+    private static ReadingFilterDTO validReadingDTOFilter;
+    private static ReadingFilterDTO defaultReadingFilterDTO;
 
-    static Specification<Reading> validSpecification;
-    static Specification<Reading> defaultSpecification;
+    private static Specification<Reading> validSpecification;
+    private static Specification<Reading> defaultSpecification;
 
-    static ReadingBuilder readingBuilder = ReadingBuilder.getInstance();
-    static Reading validReading;
-    static Reading notValidReading;
-    static ReadingDTO validReadingDTO;
+    private static ReadingBuilder readingBuilder = ReadingBuilder.getInstance();
+    private static Reading validReading;
+    private static ReadingDTO validReadingDTO;
 
-    static User sensorOwner;
-    static Sensor sensorInFavLocation;
+    private ReadingService readingService;
 
-    static Set<String> favLocationNames;
-
-    ReadingService readingService;
-
-    ReadingRepository readingRepository;
-    UserRepository userRepository;
-    ReadingMapper readingMapper;
+    private Sensor sensorInFavLocation;
+    private Set<String> favLocationNames;
+    private ReadingRepository readingRepository;
+    private UserRepository userRepository;
+    private EntityManager entityManager;
+    private ReadingMapper readingMapper;
 
 
     @BeforeAll
     static void setupStaticMock() {
-        notValidReading = readingBuilder.buildReading();
+        Reading notValidReading = readingBuilder.buildReading();
 
 
         readingBuilder = readingBuilder.withTemperature(30.0);
@@ -89,22 +87,20 @@ public class ReadingServiceTest {
         userRepository = mock(UserRepository.class);
         readingRepository = mock(ReadingRepository.class);
         readingMapper = mock(ReadingMapper.class);
+        entityManager = mock(EntityManager.class);
 
         defaultReadingFilterDTO.setSensorOwnerUsername(SENSOR_OWNER_USERNAME);
 
-        sensorOwner = new User(SENSOR_OWNER_USERNAME, "password", List.of(LOCATION_RZESZOW, LOCATION_WROCLAW));
-        sensorInFavLocation = new Sensor("sensor in favorite location",
-                                         sensorOwner,
-                                         "10.0.0.1",
-                                         "AB:CD:EF:GH:10",
-                                          LOCATION_RZESZOW,
-                                         true);
+        User sensorOwner = new User(SENSOR_OWNER_USERNAME, "password", List.of(LOCATION_RZESZOW, LOCATION_WROCLAW));
+        sensorInFavLocation = new Sensor("sensor in favorite location", sensorOwner,
+                                         "10.0.0.1", "AB:CD:EF:GH:10",
+                                          LOCATION_RZESZOW, true);
         favLocationNames = sensorOwner.getFavoriteLocations().stream().map(Location::getName).collect(Collectors.toSet());
 
         when(readingMapper.toDto(validReading)).thenReturn(validReadingDTO);
         when(userRepository.findById(SENSOR_OWNER_USERNAME)).thenReturn(Optional.of(sensorOwner));
 
-        readingService = new ReadingServiceImpl(readingRepository, userRepository, readingMapper);
+        readingService = new ReadingServiceImpl(readingRepository, userRepository, readingMapper,entityManager);
     }
 
     @Test
@@ -242,6 +238,83 @@ public class ReadingServiceTest {
                 favLocationReading -> assertTrue(favLocationNames.contains(favLocationReading.locationName()))
         );
     }
+
+    @Test
+    @DisplayName("Method addReading should not return null value")
+    void addReadingShouldNotReturnNull() {
+        UUID sensorID = UUID.randomUUID();
+        ReadingDTO readingDTO = readingBuilder.withDefaultValues().buildReadingDTO();
+        Reading reading = readingBuilder.buildReading();
+
+        when(readingMapper.toEntity(readingDTO)).thenReturn(reading);
+        when(entityManager.find(eq(Sensor.class), any(UUID.class))).thenReturn(new Sensor());
+
+        assertNotNull(readingService.addReading(sensorID, readingDTO));
+    }
+
+    @Test
+    @DisplayName("Method addReading should return the readingDTO timestamp")
+    void addReadingShouldReturnReadingDTOTimestamp() {
+        UUID sensorID = UUID.randomUUID();
+        ReadingDTO readingDTO = readingBuilder.withDefaultValues().buildReadingDTO();
+        Reading reading = readingBuilder.buildReading();
+        Instant correctDate = LocalDateTime.of(2000, 1, 1, 12, 0)
+                                            .toInstant(ZoneOffset.UTC);
+
+        when(readingMapper.toEntity(readingDTO)).thenReturn(reading);
+        when(entityManager.find(eq(Sensor.class), any(UUID.class))).thenReturn(new Sensor());
+
+        Instant resultInstant = readingService.addReading(sensorID, readingDTO);
+        assertEquals(0, correctDate.compareTo(resultInstant));
+    }
+
+    @Test
+    @DisplayName("Method addReading should call the readingRepository with entity reading matching the readingDTO")
+    void addReadingShouldCallReadingRepositoryWithTheReading() {
+        UUID sensorID = UUID.randomUUID();
+        ReadingDTO readingDTO = readingBuilder.withDefaultValues().buildReadingDTO();
+        Reading reading = readingBuilder.buildReading();
+
+        when(readingMapper.toEntity(readingDTO)).thenReturn(reading);
+        when(entityManager.find(eq(Sensor.class), any(UUID.class))).thenReturn(new Sensor());
+
+        readingService.addReading(sensorID, readingDTO);
+
+        verify(readingRepository).save(reading);
+    }
+
+    @Test
+    @DisplayName("Method add reading should set the Sensor field in the reading to persist before performing a save")
+    void addReadingShouldSetSensorFiledOfReadingToPersistBeforeSaving() {
+        UUID sensorID = UUID.randomUUID();
+        ReadingDTO readingDTO = readingBuilder.withDefaultValues().buildReadingDTO();
+        Reading reading = readingBuilder.withSensor(null).buildReading();
+
+        when(readingMapper.toEntity(readingDTO)).thenReturn(reading);
+        when(entityManager.find(eq(Sensor.class), any(UUID.class))).thenReturn(new Sensor());
+
+        readingService.addReading(sensorID, readingDTO);
+
+        ArgumentCaptor<Reading> readingCaptor = ArgumentCaptor.forClass(Reading.class);
+        verify(readingRepository).save(readingCaptor.capture());
+
+        Reading readingToPersist = readingCaptor.getValue();
+        assertNotNull(readingToPersist.getSensor());
+    }
+
+    @Test
+    @DisplayName("If the sensor of reading is null, method add reading should throw SensorNotFound exception")
+    void addReadingShouldThrowSensorNotFoundException() {
+        UUID sensorID = UUID.randomUUID();
+        ReadingDTO readingDTO = readingBuilder.withDefaultValues().buildReadingDTO();
+        Reading reading = readingBuilder.withSensor(null).buildReading();
+
+        when(readingMapper.toEntity(readingDTO)).thenReturn(reading);
+        when(entityManager.find(eq(Sensor.class), any(UUID.class))).thenReturn(null);
+
+        assertThrows(SensorNotFoundException.class, () -> readingService.addReading(sensorID, readingDTO));
+    }
+
 
     @AfterAll
     static void tearDownStaticMock() {

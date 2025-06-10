@@ -17,4 +17,11 @@ public interface ReadingMapper {
     @Mapping(target = "locationName", source = "entity.sensor.location.name")
     @Mapping(target = "timestamp",   source = "entity.timestamp")
     ReadingDTO toDto(Reading entity);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "sensor", ignore = true)
+    @Mapping(target = "temperature", source = "dto.temperature")
+    @Mapping(target = "humidity", source = "dto.humidity")
+    @Mapping(target = "timestamp", source = "dto.timestamp")
+    Reading toEntity(ReadingDTO dto);
 }

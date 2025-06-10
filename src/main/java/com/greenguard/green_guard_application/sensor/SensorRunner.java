@@ -1,11 +1,15 @@
 package com.greenguard.green_guard_application.sensor;
 
+import com.greenguard.green_guard_application.model.dto.ReadingDTO;
+import com.greenguard.green_guard_application.service.ReadingService;
+import com.greenguard.green_guard_application.service.SensorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -18,7 +22,8 @@ import com.greenguard.green_guard_application.model.entity.Sensor;
 @Component
 public class SensorRunner implements ApplicationRunner {
 
-  private SensorRepository sensorRepository;
+  private final SensorRepository sensorRepository;
+  private final ReadingService readingService;
 
   // TODO: Add synchronization over it
   private Thread sensorManagerThread;
@@ -26,9 +31,10 @@ public class SensorRunner implements ApplicationRunner {
   private List<SensorContext> ctx;
 
   @Autowired
-  public SensorRunner(SensorRepository sensorRepository)
+  public SensorRunner(SensorRepository sensorRepository, ReadingService readingService)
   {
     this.sensorRepository = sensorRepository;
+    this.readingService = readingService;
     this.ctx = new ArrayList<>();
   }
 
@@ -54,11 +60,19 @@ public class SensorRunner implements ApplicationRunner {
       while(true) {
           synchronized(this.ctx) {
               for (SensorContext sensor : ctx) {
-                  if(sensor.connect() == false)
+                  if(!sensor.connect())
                     continue;
 
-                  if(sensor.hasTimedOut() == true) {
+                  if(sensor.hasTimedOut()) {
                     sensor.requestData();
+                    if (sensor.getDataNew()) {
+                        sensor.setDataNew(false);
+
+                        ATHPacketBuilder.ATHData data = sensor.getRecentReading();
+                        ReadingDTO readingDTO = new ReadingDTO(null, (double) data.temperature, (double) data.humidity, null, Instant.now());
+                        readingService.addReading(sensor.getId(), readingDTO);
+                    }
+
                   }
               }
             }
