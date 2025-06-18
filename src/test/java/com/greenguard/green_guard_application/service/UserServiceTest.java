@@ -17,7 +17,7 @@ import static org.mockito.Mockito.*;
 
 public class UserServiceTest {
 
-    // DEFAULT TEST VALUES
+    //  constant helper fields
     private static final String username = "example user";
     private static final String password = "password";
     private static final String locationName_Rzeszow = "Rzeszow";
@@ -25,12 +25,17 @@ public class UserServiceTest {
     private static final Location locationRzeszow = new Location(locationName_Rzeszow);
     private static final Location locationWroclaw = new Location(locationName_Wroclaw);
 
-    UserService userService;
+    // helper fields
+    List<Location> favLocations;
+    User user;
+
+    // mocked fields
     UserRepository userRepository;
     LocationRepository locationRepository;
 
-    List<Location> favLocations;
-    User user;
+    // tested field
+    UserService userService;
+
 
     @BeforeEach
     void setup() {

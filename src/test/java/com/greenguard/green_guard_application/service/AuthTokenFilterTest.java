@@ -25,33 +25,34 @@ import static org.mockito.Mockito.*;
 
 public class AuthTokenFilterTest {
 
-    AuthTokenFilter authFilter;
+    // helper fields
+    String username = "username";
+    String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJleGFtcGxlVXNlciIsImlhdCI6MTY4MTY1ODQyMywiZXhwIjoxNjgxNjYyMDIzfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+    String authHeader = "Bearer " + token;
 
+    // mocked fields
     JwtUtil jwtTokenGenerator;
     UserDetailsService userDetailsService;
-
     MockHttpServletRequest request;
     HttpServletResponse response;
     FilterChain filterChain;
 
-    String username = "username";
-    String authHeader = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJleGFtcGxlVXNlciIsImlhdCI6MTY4MTY1ODQyMywiZXhwIjoxNjgxNjYyMDIzfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-    String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJleGFtcGxlVXNlciIsImlhdCI6MTY4MTY1ODQyMywiZXhwIjoxNjgxNjYyMDIzfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-
+    // tested field
+    AuthTokenFilter authFilter;
 
     @BeforeEach
     void setup() {
         request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJleGFtcGxlVXNlciIsImlhdCI6MTY4MTY1ODQyMywiZXhwIjoxNjgxNjYyMDIzfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
+        request.addHeader("Authorization", authHeader);
 
         response = mock(HttpServletResponse.class);
         filterChain = mock(FilterChain.class);
 
         jwtTokenGenerator = mock(JwtUtil.class);
-        userDetailsService = mock(UserDetailsService.class);
-
-        when(jwtTokenGenerator.validateJwtToken(token)).thenReturn(true);
         when(jwtTokenGenerator.getUsernameFromToken(token)).thenReturn(username);
+        when(jwtTokenGenerator.validateJwtToken(token)).thenReturn(true);
+
+        userDetailsService = mock(UserDetailsService.class);
         when(userDetailsService.loadUserByUsername(username)).thenReturn(new org.springframework.security.core.userdetails.User(username, "password", Collections.emptyList()));
 
         authFilter = new AuthTokenFilter(jwtTokenGenerator, userDetailsService);

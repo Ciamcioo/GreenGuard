@@ -13,10 +13,13 @@ import org.mapstruct.factory.Mappers;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ReadingMapperTest {
-    private final ReadingMapper readingMapper = Mappers.getMapper(ReadingMapper.class);
+
+    // helper fields
     private final Reading       reading       = ReadingBuilder.getInstance().buildReading();
     private final ReadingDTO    readingDto    = ReadingBuilder.getInstance().buildReadingDTO();
 
+    // tested field
+    private final ReadingMapper readingMapper = Mappers.getMapper(ReadingMapper.class);
 
     @Test
     @DisplayName("Reading Mapper should return null if argument is null")

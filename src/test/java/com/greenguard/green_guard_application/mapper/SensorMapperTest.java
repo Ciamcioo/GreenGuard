@@ -4,18 +4,12 @@ import com.greenguard.green_guard_application.model.dto.SensorDTO;
 import com.greenguard.green_guard_application.model.entity.Sensor;
 import com.greenguard.green_guard_application.model.entity.Location;
 import com.greenguard.green_guard_application.model.entity.User;
-import com.greenguard.green_guard_application.service.mapper.LocationMapper;
 import com.greenguard.green_guard_application.service.mapper.SensorMapper;
+import com.greenguard.green_guard_application.util.SensorBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.UUID;
 
@@ -23,62 +17,45 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SensorMapperTest {
 
-    private static final UUID     TEST_SENSOR_ID            = UUID.randomUUID();
-    private static final String   TEST_SENSOR_NAME          = "Foo";
-    private static final String   TEST_SENSOR_USERNAME      = "John";
-    private static final User     TEST_SENSOR_USER          = new User(TEST_SENSOR_USERNAME, "password");
-    private static final String   TEST_SENSOR_IP            = "192.168.1.10";
-    private static final String   TEST_SENSOR_MAC           = "DE:AD:BE:EF:12:34";
-    private static final String   TEST_SENSOR_LOCATION_NAME = "Location";
-    private static final Boolean  TEST_SENSOR_ACTIVE        = false;
+    // helper fields
+    private Sensor sensorEntity;
+    private SensorDTO sensorDTO;
 
-    private Sensor test_sensor_entity;
-    private SensorDTO test_sensor_dto;
-
+    // tested field
     private final SensorMapper sensorMapper = Mappers.getMapper(SensorMapper.class);
 
     @BeforeEach
     void setup() {
-        test_sensor_entity = new Sensor(TEST_SENSOR_ID,
-                                        TEST_SENSOR_NAME,
-                                        TEST_SENSOR_USER,
-                                        TEST_SENSOR_IP,
-                                        TEST_SENSOR_MAC,
-                                        new Location(TEST_SENSOR_LOCATION_NAME),
-                                        TEST_SENSOR_ACTIVE);
-
-        test_sensor_dto = new SensorDTO(TEST_SENSOR_NAME,
-                                        TEST_SENSOR_IP,
-                                        TEST_SENSOR_LOCATION_NAME,
-                                        TEST_SENSOR_ACTIVE);
+        sensorEntity = SensorBuilder.getInstance().withDefaultValues().buildSensor();
+        sensorDTO = SensorBuilder.getInstance().withDefaultValues().buildSensorDTO();
     }
 
     @Test
     @DisplayName("Result sensorDTO after mapping should have fields with the same values as sensor entity")
     void mapSensorEntityToSensorDTO() {
-        SensorDTO resultSensorDTO = sensorMapper.toDTO(test_sensor_entity);
+        SensorDTO resultSensorDTO = sensorMapper.toDTO(sensorEntity);
 
         assertAll(
-                () -> assertEquals(TEST_SENSOR_NAME, resultSensorDTO.name()),
-                () -> assertEquals(TEST_SENSOR_IP, resultSensorDTO.ipAddress()),
-                () -> assertEquals(TEST_SENSOR_LOCATION_NAME, resultSensorDTO.locationName()),
-                () -> assertEquals(TEST_SENSOR_ACTIVE, resultSensorDTO.active())
+                () -> assertEquals(SensorBuilder.DEFAULT_NAME,             resultSensorDTO.name()),
+                () -> assertEquals(SensorBuilder.DEFAULT_IP_ADDRESS,       resultSensorDTO.ipAddress()),
+                () -> assertEquals(SensorBuilder.DEFAULT_LOCATION_NAME,    resultSensorDTO.locationName()),
+                () -> assertEquals(SensorBuilder.DEFAULT_ACTIVATION_STATE, resultSensorDTO.active())
         );
     }
 
     @Test
     @DisplayName("Result sensor entity after mapping should have fields with the same value as sensorDTO")
     void mapSensorDTOToSensorEntity() {
-        Sensor resultSensor = sensorMapper.toEntity(test_sensor_dto);
+        Sensor resultSensor = sensorMapper.toEntity(sensorDTO);
 
         assertAll(
                 () -> assertNull(resultSensor.getId()),
-                () -> assertEquals(TEST_SENSOR_NAME, resultSensor.getName()),
                 () -> assertNull(resultSensor.getUser()),
-                () -> assertEquals(TEST_SENSOR_IP, resultSensor.getIpAddress()),
                 () -> assertNull(resultSensor.getMacAddress()),
-                () -> assertEquals(TEST_SENSOR_ACTIVE, resultSensor.getActive()),
                 () -> assertNull(resultSensor.getLocation()),
+                () -> assertEquals(SensorBuilder.DEFAULT_NAME,             resultSensor.getName()),
+                () -> assertEquals(SensorBuilder.DEFAULT_IP_ADDRESS,       resultSensor.getIpAddress()),
+                () -> assertEquals(SensorBuilder.DEFAULT_ACTIVATION_STATE, resultSensor.getActive()),
                 () -> assertTrue(resultSensor.getReadings().isEmpty())
         );
     }

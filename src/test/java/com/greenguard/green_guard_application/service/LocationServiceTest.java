@@ -16,10 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class LocationServiceTest {
-    LocationService locationService;
 
+    // mocked fields
     LocationRepository locationRepository;
     LocationMapper locationMapper;
+
+    // tested field
+    LocationService locationService;
 
     @BeforeEach
     void setup() {

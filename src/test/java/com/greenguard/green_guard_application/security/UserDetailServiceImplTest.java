@@ -16,10 +16,14 @@ import static org.mockito.Mockito.when;
 
 public class UserDetailServiceImplTest {
 
-    UserDetailsServiceImpl userDetailsService;
+    // helper field
+    private User testUser;
 
+    // mocked field
     UserRepository userRepository;
-    User testUser;
+
+    // tested field
+    UserDetailsServiceImpl userDetailsService;
 
     @BeforeEach
     void setup() {

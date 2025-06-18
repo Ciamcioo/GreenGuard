@@ -13,6 +13,11 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 
 public class ReadingBuilder {
+    public static final Sensor   DEFAULT_SENSOR      = new Sensor(null, "test sensor", new User("test_username", "password"),
+                                                    "127.0.0.1", "4A:9F:2C:75:B1:E3", new Location("test_location"), false);
+    public static final Double   DEFAULT_TEMPERATURE = 20.0;
+    public static final Double   DEFAULT_HUMIDITY    = 20.0;
+    public static final Instant  DEFAULT_TIMESTAMP   = LocalDateTime.of(2000, 1, 1, 12, 0).toInstant(ZoneOffset.UTC);
 
     private UUID      id;
     private Sensor    sensor;
@@ -55,18 +60,10 @@ public class ReadingBuilder {
 
     public ReadingBuilder withDefaultValues() {
         this.id = UUID.randomUUID();
-        this.sensor = new Sensor(null,
-                                "test sensor",
-                                new User("test_username", "password"),
-                                "127.0.0.1",
-                                "4A:9F:2C:75:B1:E3",
-                                new Location("test_location"),
-                                false);
-        this.temperature = 20.0;
-        this.humidity = 20.0;
-        this.timestamp = LocalDateTime
-                                .of(2000, 1, 1, 12, 0)
-                                .toInstant(ZoneOffset.UTC);
+        this.sensor = DEFAULT_SENSOR;
+        this.temperature = DEFAULT_TEMPERATURE;
+        this.humidity = DEFAULT_HUMIDITY;
+        this.timestamp = DEFAULT_TIMESTAMP;
         return this;
     }
 

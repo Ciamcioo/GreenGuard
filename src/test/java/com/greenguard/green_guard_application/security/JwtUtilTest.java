@@ -21,18 +21,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource("classpath*:application-test.properties")
 public class JwtUtilTest {
 
+    // helper fields
+    @Value(value = "${jwt.secret}") private String secret;
+    @Value(value = "${jwt.expiration.time}")  private long expirationTime;
+    private final String username = "username1";
+    private String token;
+    private Key key;
+
+    // tested field
     @Autowired
-    JwtUtil jwtUtil;
-
-    @Value(value = "${jwt.secret}")
-    String secret;
-
-    @Value(value = "${jwt.expiration.time}")
-    long expirationTime;
-
-    String username = "username1";
-    String token;
-    Key key;
+    private JwtUtil jwtUtil;
 
     @BeforeEach
     void setup() {

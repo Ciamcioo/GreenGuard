@@ -18,10 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class LocationMapperTest {
+
+    // constant helper fields
     private static final String      LOCATION_NAME = "test location";
     private static final Location    LOCATION      = new Location(LOCATION_NAME);
     private static final LocationDTO LOCATION_DTO  = new LocationDTO(LOCATION_NAME);
 
+    // tested field
     private final LocationMapper locationMapper = Mappers.getMapper(LocationMapper.class);
 
     @Test

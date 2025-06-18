@@ -20,22 +20,24 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class AuthServiceTest {
+    // constant helper field
+    private final static String encodedPassword = "$2a$10$YLMG97UK53w.fAkh2Ys/uel3yvNtTg0SfpAbpoan0nBIgVmHtv8y6";    // Decoded password: admin
 
-    AuthService authService;
+    // helper fields
+    private CredentialsDTO validCredentialsDTO;
+    private CredentialsDTO encdoedCredentialsDTO;
 
+    // mocked fields
     AuthenticationManager authManager;
     PasswordEncoder passwordEncoder;
-    UserDetailsService userDetailsService;
-    JwtUtil jwtTokenGenerator;
     UserRepository userRepository;
-
+    JwtUtil jwtTokenGenerator;
+    UserDetailsService userDetailsService;
     UserDetails validUserDetails;
     UserDetails encodedUserDetails;
-    CredentialsDTO validCredentialsDTO;
-    CredentialsDTO encdoedCredentialsDTO;
 
-    // Decoded password: admin
-    String encodedPassword = "$2a$10$YLMG97UK53w.fAkh2Ys/uel3yvNtTg0SfpAbpoan0nBIgVmHtv8y6";
+    // tested field
+    private AuthService authService;
 
     @BeforeEach
     void setup() {
@@ -44,21 +46,20 @@ public class AuthServiceTest {
 
         authManager = mock(AuthenticationManager.class);
         passwordEncoder = mock(PasswordEncoder.class);
-        jwtTokenGenerator = mock(JwtUtil.class);
         userRepository = mock(UserRepository.class);
 
-        userDetailsService = mock(UserDetailsService.class);
-        validUserDetails   = mock(UserDetails.class);
-        encodedUserDetails = mock(UserDetails.class);
+        jwtTokenGenerator = mock(JwtUtil.class);
+        when(jwtTokenGenerator.generateToken(anyString())).thenReturn("token");
 
+        userDetailsService = mock(UserDetailsService.class);
         when(userDetailsService.loadUserByUsername(validCredentialsDTO.getUsername())).thenReturn(validUserDetails);
+        when(userDetailsService.loadUserByUsername(encdoedCredentialsDTO.getUsername())).thenReturn(encodedUserDetails);
+
+        validUserDetails   = mock(UserDetails.class);
         when(validUserDetails.getUsername()).thenReturn(validCredentialsDTO.getUsername());
 
-        when(userDetailsService.loadUserByUsername(encdoedCredentialsDTO.getUsername())).thenReturn(encodedUserDetails);
+        encodedUserDetails = mock(UserDetails.class);
         when(encodedUserDetails.getUsername()).thenReturn(encdoedCredentialsDTO.getUsername());
-
-
-        when(jwtTokenGenerator.generateToken(anyString())).thenReturn("token");
 
         authService = new AuthServiceImpl(authManager, passwordEncoder, userDetailsService, jwtTokenGenerator, userRepository);
     }
@@ -77,7 +78,6 @@ public class AuthServiceTest {
     void passwordEncodingShouldNotBeInvokedIfThePasswordIsEncoded() {
         authService.login(encdoedCredentialsDTO);
         verify(passwordEncoder, never()).encode(encdoedCredentialsDTO.getPassword());
-
     }
 
     @Test
@@ -164,7 +164,4 @@ public class AuthServiceTest {
         assertEquals(validCredentialsDTO.getUsername(), authService.signup(validCredentialsDTO));
         verify(userRepository).save(user);
     }
-
-
-
 }
