@@ -43,3 +43,21 @@ CREATE TABLE users_locations (
                                  FOREIGN KEY (username) REFERENCES gg_users(username),
                                  FOREIGN KEY (location_name) REFERENCES locations(name)
 );
+
+INSERT INTO locations
+VALUES ('Wroclaw');
+
+INSERT INTO locations
+VALUES ('Warszawa');
+
+INSERT INTO locations
+VALUES ('Poznan');
+
+INSERT INTO locations
+VALUES ('Rzeszow');
+
+INSERT INTO locations
+VALUES ('Gdansk');
+
+INSERT INTO locations
+VALUES ('not specified');
