@@ -51,15 +51,16 @@ public class AuthServiceTest {
         jwtTokenGenerator = mock(JwtUtil.class);
         when(jwtTokenGenerator.generateToken(anyString())).thenReturn("token");
 
-        userDetailsService = mock(UserDetailsService.class);
-        when(userDetailsService.loadUserByUsername(validCredentialsDTO.getUsername())).thenReturn(validUserDetails);
-        when(userDetailsService.loadUserByUsername(encdoedCredentialsDTO.getUsername())).thenReturn(encodedUserDetails);
-
         validUserDetails   = mock(UserDetails.class);
         when(validUserDetails.getUsername()).thenReturn(validCredentialsDTO.getUsername());
 
         encodedUserDetails = mock(UserDetails.class);
         when(encodedUserDetails.getUsername()).thenReturn(encdoedCredentialsDTO.getUsername());
+
+        userDetailsService = mock(UserDetailsService.class);
+        when(userDetailsService.loadUserByUsername(validCredentialsDTO.getUsername())).thenReturn(validUserDetails);
+        when(userDetailsService.loadUserByUsername(encdoedCredentialsDTO.getUsername())).thenReturn(encodedUserDetails);
+
 
         authService = new AuthServiceImpl(authManager, passwordEncoder, userDetailsService, jwtTokenGenerator, userRepository);
     }

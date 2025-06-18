@@ -102,7 +102,7 @@ public class JwtUtilTest {
     @DisplayName("Method validateToken should return true, the token is valid")
     void performAValidationOfAValidToken() throws InterruptedException {
         token = jwtUtil.generateToken(username);
-        Thread.sleep(new Random().nextLong(expirationTime - (3*expirationTime/10)) + expirationTime/20);
+        Thread.sleep(new Random().nextLong(expirationTime - (expirationTime/2)) + expirationTime/20);
 
         assertTrue(jwtUtil.validateJwtToken(token));
     }
